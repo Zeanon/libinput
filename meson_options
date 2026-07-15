@@ -48,5 +48,5 @@ option('autoload-plugins',
 	description: 'Always load plugins from default plugin paths (only if the caller does not do so)')
 option('lua-plugins',
 	type: 'feature',
-	value: 'enabled',
+	value: 'enable',
 	description: 'Enable support for Lua plugins')
