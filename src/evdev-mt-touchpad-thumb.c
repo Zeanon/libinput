@@ -111,7 +111,7 @@ static bool
 tp_thumb_needs_jail(const struct tp_dispatch *tp, const struct tp_touch *t)
 {
 	if (t->point.y < tp->thumb.upper_thumb_line ||
-	    tp->scroll.method == LIBINPUT_CONFIG_SCROLL_EDGE)
+	    tp->scroll.method == LIBINPUT_CONFIG_SCROLL_EDGE )
 		return false;
 
 	if (!tp_thumb_in_exclusion_area(tp, t) &&
@@ -308,7 +308,7 @@ tp_thumb_update_multifinger(struct tp_dispatch *tp)
 	 */
 	if (newest && tp->thumb.state == THUMB_STATE_FINGER && tp->nfingers_down >= 2 &&
 	    speed_exceeded_count > 5 &&
-	    (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG ||
+	    ((tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG && tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE) ||
 	     (mm.x > SCROLL_MM_X || mm.y > SCROLL_MM_Y))) {
 		evdev_log_debug(tp->device,
 				"touch %d is speed-based thumb\n",

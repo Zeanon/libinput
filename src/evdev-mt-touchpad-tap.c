@@ -1595,7 +1595,7 @@ tp_init_tap(struct tp_dispatch *tp)
 	const struct input_absinfo *absy = device->abs.absinfo_y;
 	assert(absx && absy);
 
-	struct phys_coords mm = { 5.0, 5.0 };
+	struct phys_coords mm = { 1.0, 1.0 };
 	struct device_coords edge_margin = evdev_device_mm_to_units(device, &mm);
 
 	tp->tap.edges.left = edge_margin.x;
