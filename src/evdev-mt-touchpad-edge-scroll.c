@@ -486,10 +486,10 @@ tp_edge_scroll_post_events(struct tp_dispatch *tp, usec_t time)
 			continue;
 
 		// if natural scrolling is enabled, revert the direction here so edge scroll is always normal
-		if (device->scroll.natural_scrolling_enabled) {
-			normalized.x = normalized.x * -1;
-			normalized.y = normalized.y * -1;
-		}
+		// if (device->scroll.natural_scrolling_enabled) {
+		//	normalized.x = normalized.x * -1;
+		//	normalized.y = normalized.y * -1;
+		// }
 		evdev_notify_axis_finger(device, time, bit(axis), &normalized);
 		t->scroll.direction = axis;
 
