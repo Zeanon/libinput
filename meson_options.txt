@@ -44,9 +44,9 @@ option('internal-event-debugging',
 	description: 'Enable additional internal event debug tracing. This will print key values to the logs and thus must never be enabled in a release build')
 option('autoload-plugins',
 	type: 'boolean',
-	value: false,
+	value: true,
 	description: 'Always load plugins from default plugin paths (only if the caller does not do so)')
 option('lua-plugins',
 	type: 'feature',
-	value: 'auto',
+	value: 'enabled',
 	description: 'Enable support for Lua plugins')
