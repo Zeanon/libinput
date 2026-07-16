@@ -420,7 +420,9 @@ struct tp_dispatch {
 		struct libinput_device_config_scroll_method config_method;
 		enum libinput_config_scroll_method method;
 		int32_t right_edge;  /* in device coordinates */
+		int32_t left_edge;
 		int32_t bottom_edge; /* in device coordinates */
+		int32_t upper_edge;
 		struct {
 			bool h, v;
 		} active;
