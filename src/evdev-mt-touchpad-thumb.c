@@ -308,7 +308,7 @@ tp_thumb_update_multifinger(struct tp_dispatch *tp)
 	 */
 	if (newest && tp->thumb.state == THUMB_STATE_FINGER && tp->nfingers_down >= 2 &&
 	    speed_exceeded_count > 5 &&
-	    (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG ||
+	    ((tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG && tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE) ||
 	     (mm.x > SCROLL_MM_X || mm.y > SCROLL_MM_Y))) {
 		evdev_log_debug(tp->device,
 				"touch %d is speed-based thumb\n",
