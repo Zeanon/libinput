@@ -77,10 +77,10 @@ tp_touch_get_edge(const struct tp_dispatch *tp, const struct tp_touch *t)
 	if (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE)
 		return EDGE_NONE;
 
-	if (t->point.x > tp->scroll.right_edge)
+	if (t->point.x > tp->scroll.right_edge || t->point.x < tp->scroll.left_edge)
 		edge |= EDGE_RIGHT;
 
-	if (t->point.y > tp->scroll.bottom_edge)
+	if (t->point.y > tp->scroll.bottom_edge || t->point.y < tp->scroll.upper_edge)
 		edge |= EDGE_BOTTOM;
 
 	return edge;
@@ -310,8 +310,12 @@ tp_edge_scroll_init(struct tp_dispatch *tp, struct evdev_device *device)
 		want_horiz_scroll = (height >= 40);
 
 	/* 7mm edge size */
-	mm.x = width - 7;
-	mm.y = height - 7;
+	//mm.x = width - 7;
+	// Right Edge
+	mm.x = width - 3;
+	//mm.y = height - 7;
+	// Bottom Edge
+	mm.y = height - 2;
 	edges = evdev_device_mm_to_units(device, &mm);
 
 	tp->scroll.right_edge = edges.x;
@@ -319,6 +323,18 @@ tp_edge_scroll_init(struct tp_dispatch *tp, struct evdev_device *device)
 		tp->scroll.bottom_edge = edges.y;
 	else
 		tp->scroll.bottom_edge = INT_MAX;
+
+	// Left Edge
+	mm.x = 3;
+	// Top Edge
+	mm.y = 3;
+	edges = evdev_device_mm_to_units(device, &mm);
+
+	tp->scroll.left_edge = edges.x;
+	if (want_horiz_scroll)
+		tp->scroll.upper_edge = edges.y;
+	else
+		tp->scroll.upper_edge = INT_MIN;
 
 	i = 0;
 	tp_for_each_touch(tp, t) {
@@ -469,6 +485,11 @@ tp_edge_scroll_post_events(struct tp_dispatch *tp, usec_t time)
 		if (*delta == 0.0)
 			continue;
 
+		// if natural scrolling is enabled, revert the direction here so edge scroll is always normal
+		// if (device->scroll.natural_scrolling_enabled) {
+		//	normalized.x = normalized.x * -1;
+		//	normalized.y = normalized.y * -1;
+		// }
 		evdev_notify_axis_finger(device, time, bit(axis), &normalized);
 		t->scroll.direction = axis;
 
