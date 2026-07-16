@@ -77,11 +77,17 @@ tp_touch_get_edge(const struct tp_dispatch *tp, const struct tp_touch *t)
 	if (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE)
 		return EDGE_NONE;
 
-	if (t->point.x > tp->scroll.right_edge || t->point.x < tp->scroll.left_edge)
+	if (t->point.x > tp->scroll.right_edge)
 		edge |= EDGE_RIGHT;
 
-	if (t->point.y > tp->scroll.bottom_edge || t->point.y < tp->scroll.upper_edge)
+	if (t->point.x < tp->scroll.left_edge)
+		edge |= EDGE_LEFT;
+
+	if (t->point.y > tp->scroll.bottom_edge)
 		edge |= EDGE_BOTTOM;
+
+	if (t->point.y < tp->scroll.upper_edge)
+		edge |= EDGE_TOP;
 
 	return edge;
 }
@@ -210,7 +216,7 @@ tp_edge_scroll_handle_edge(struct tp_dispatch *tp,
 		break;
 	case SCROLL_EVENT_MOTION:
 		/* If started at the bottom right, decide in which dir to scroll */
-		if (t->scroll.edge == (EDGE_RIGHT | EDGE_BOTTOM)) {
+		if (t->scroll.edge == (EDGE_RIGHT | EDGE_BOTTOM | EDGE_LEFT | EDGE_BOTTOM)) {
 			t->scroll.edge &= tp_touch_get_edge(tp, t);
 			if (!t->scroll.edge)
 				tp_edge_scroll_set_state(tp,
@@ -443,10 +449,12 @@ tp_edge_scroll_post_events(struct tp_dispatch *tp, usec_t time)
 				t->scroll.direction = -1;
 			}
 			continue;
+		case EDGE_LEFT:
 		case EDGE_RIGHT:
 			axis = LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL;
 			delta = &normalized.y;
 			break;
+		case EDGE_TOP:
 		case EDGE_BOTTOM:
 			axis = LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL;
 			delta = &normalized.x;

@@ -145,6 +145,8 @@ enum tp_edge {
 	EDGE_NONE = 0,
 	EDGE_RIGHT = bit(0),
 	EDGE_BOTTOM = bit(1),
+	EDGE_LEFT = bit(2),
+	EDGE_TOP = bit(3),
 };
 
 enum tp_edge_scroll_touch_state {
