@@ -1022,6 +1022,12 @@ tp_palm_detect_edge(struct tp_dispatch *tp, struct tp_touch *t, usec_t time)
 	if (tp_touch_get_edge(tp, t) & EDGE_RIGHT)
 		return false;
 
+	if (tp_touch_get_edge(tp, t) & EDGE_LEFT)
+		return false;
+	
+	if (tp_touch_get_edge(tp, t) & EDGE_TOP)
+		return false;
+
 	t->palm.state = PALM_EDGE;
 	t->palm.time = time;
 	t->palm.first = t->point;
@@ -3434,12 +3440,12 @@ tp_init_palmdetect_edge(struct tp_dispatch *tp, struct evdev_device *device)
 	edges = evdev_device_mm_to_units(device, &mm);
 	tp->palm.right_edge = edges.x;
 
-	// if (!tp->buttons.has_topbuttons && height > 55) {
-	//	/* top edge is 5% of the height */
-	//	mm.y = height * 0.05;
-	//	edges = evdev_device_mm_to_units(device, &mm);
-	//	//tp->palm.upper_edge = edges.y;
-	// }
+	if (!tp->buttons.has_topbuttons && height > 55) {
+		/* top edge is 5% of the height */
+		mm.y = height * 0.05;
+		edges = evdev_device_mm_to_units(device, &mm);
+		tp->palm.upper_edge = edges.y;
+	}
 }
 
 static int
