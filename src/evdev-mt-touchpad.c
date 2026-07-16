@@ -3438,7 +3438,7 @@ tp_init_palmdetect_edge(struct tp_dispatch *tp, struct evdev_device *device)
 		/* top edge is 5% of the height */
 		mm.y = height * 0.05;
 		edges = evdev_device_mm_to_units(device, &mm);
-		tp->palm.upper_edge = edges.y;
+		//tp->palm.upper_edge = edges.y;
 	}
 }
 
