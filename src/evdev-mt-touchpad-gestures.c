@@ -1676,7 +1676,7 @@ tp_gesture_handle_state_scroll_start(struct tp_dispatch *tp, usec_t time)
 	struct device_float_coords raw;
 	struct normalized_coords delta;
 
-	if (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG)
+	if (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG && tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE)
 		return;
 
 	/* We may confuse a pinch for a scroll initially,
@@ -1708,7 +1708,7 @@ tp_gesture_handle_state_scroll(struct tp_dispatch *tp, usec_t time)
 	struct device_float_coords raw;
 	struct normalized_coords delta;
 
-	if (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG)
+	if (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG && tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE)
 		return;
 
 	/* We may confuse a pinch for a scroll initially,
@@ -2080,7 +2080,7 @@ tp_gesture_post_events(struct tp_dispatch *tp, usec_t time, bool ignore_motion)
 void
 tp_gesture_stop_twofinger_scroll(struct tp_dispatch *tp, usec_t time)
 {
-	if (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG)
+	if (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG && tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE)
 		return;
 
 	evdev_stop_scroll(tp->device, time, LIBINPUT_POINTER_AXIS_SOURCE_FINGER);
