@@ -419,6 +419,20 @@ struct tp_dispatch {
 	} buttons;
 
 	struct {
+		struct {
+			int32_t top_edge;               /* in device coordinates */
+			int32_t rightbutton_left_edge;  /* in device coordinates */
+			int32_t leftbutton_right_edge; /* in device coordinates */
+		} bottom_area;
+
+		struct {
+			int32_t bottom_edge;           /* in device coordinates */
+			int32_t rightbutton_left_edge; /* in device coordinates */
+			int32_t leftbutton_right_edge; /* in device coordinates */
+		} top_area;
+	} corner_taps;
+
+	struct {
 		struct libinput_device_config_scroll_method config_method;
 		enum libinput_config_scroll_method method;
 		int32_t right_edge;  /* in device coordinates */
@@ -444,7 +458,7 @@ struct tp_dispatch {
 		struct libinput_timer timer;
 		enum tp_tap_state state;
 		uint32_t buttons_pressed;
-		usec_t saved_press_time, saved_release_time;
+		usec_t saved_press_time, saved_release_time, saved_double_tap_time;
 
 		enum libinput_config_tap_button_map map;
 		enum libinput_config_tap_button_map want_map;
@@ -729,6 +743,12 @@ tp_edge_scroll_touch_active(const struct tp_dispatch *tp, const struct tp_touch 
 
 uint32_t
 tp_touch_get_edge(const struct tp_dispatch *tp, const struct tp_touch *t);
+
+bool
+is_inside_top_right_corner(const struct tp_dispatch *tp, const struct tp_touch *t);
+
+bool
+is_inside_top_left_corner(const struct tp_dispatch *tp, const struct tp_touch *t);
 
 void
 tp_init_gesture(struct tp_dispatch *tp);

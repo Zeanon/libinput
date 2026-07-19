@@ -1028,6 +1028,14 @@ tp_palm_detect_edge(struct tp_dispatch *tp, struct tp_touch *t, usec_t time)
 	if (tp_touch_get_edge(tp, t) & EDGE_TOP)
 		return false;
 
+	if (is_inside_top_left_corner(tp, t)) {
+		return false;
+	}
+
+	if (is_inside_top_right_corner(tp, t)) {
+		return false;
+	}
+
 	t->palm.state = PALM_EDGE;
 	t->palm.time = time;
 	t->palm.first = t->point;
@@ -3818,6 +3826,7 @@ tp_init(struct tp_dispatch *tp, struct evdev_device *device)
 		tp->jump.detection_disabled = true;
 
 	device->seat_caps |= EVDEV_DEVICE_POINTER;
+	device->seat_caps |= EVDEV_DEVICE_KEYBOARD;
 	if (tp->gesture.enabled)
 		device->seat_caps |= EVDEV_DEVICE_GESTURE;
 
