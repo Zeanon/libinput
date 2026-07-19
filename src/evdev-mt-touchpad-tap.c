@@ -108,6 +108,26 @@ tap_event_to_str(enum tap_event event)
 	return NULL;
 }
 
+static inline bool
+is_inside_top_corner_area(const struct tp_dispatch *tp, const struct tp_touch *t)
+{
+	return t->point.y <= tp->corner_taps.top_area.bottom_edge;
+}
+
+inline bool
+is_inside_top_right_corner(const struct tp_dispatch *tp, const struct tp_touch *t)
+{
+	return is_inside_top_corner_area(tp, t) &&
+	       t->point.x > tp->corner_taps.top_area.rightbutton_left_edge;
+}
+
+inline bool
+is_inside_top_left_corner(const struct tp_dispatch *tp, const struct tp_touch *t)
+{
+	return is_inside_top_corner_area(tp, t) &&
+	       t->point.x < tp->corner_taps.top_area.leftbutton_right_edge;
+}
+
 static inline void
 log_tap_bug(struct tp_dispatch *tp, struct tp_touch *t, enum tap_event event)
 {
@@ -116,6 +136,47 @@ log_tap_bug(struct tp_dispatch *tp, struct tp_touch *t, enum tap_event event)
 			       t->index,
 			       tap_event_to_str(event),
 			       tap_state_to_str(tp->tap.state));
+}
+
+static inline void
+tp_corner_tap(struct tp_dispatch *tp,
+	      usec_t time,
+	      enum libinput_button_state state)
+{
+	// only trigger on release so we can properly filter for double taps
+	if (LIBINPUT_BUTTON_STATE_RELEASED != state) return;
+
+	struct tp_touch *t = tp->touches;
+
+	if (!is_inside_top_corner_area(tp, t)) return;
+
+	/* check whether the last tap happened less than 180ms ago
+		if not it's not a double tap and we don't trigger the custom keys
+	*/
+	if (usec_cmp(usec_from_millis(180), usec_delta(time, tp->tap.saved_double_tap_time)) > 0) {
+		keycode_t keycode;
+		struct libinput_device *device = &tp->device->base;
+
+		if (is_inside_top_left_corner(tp, t)) {
+			keycode = keycode_from_uint32_t(KEY_PROG3);
+		} else if (is_inside_top_right_corner(tp, t)) {
+			keycode = keycode_from_uint32_t(KEY_PROG4);
+		} else {
+			return;
+		}
+
+		keyboard_notify_key(device,
+			time,
+			keycode,
+			LIBINPUT_KEY_STATE_PRESSED);
+		keyboard_notify_key(device,
+			time,
+			keycode,
+			LIBINPUT_KEY_STATE_RELEASED);
+	} else {
+		// Only save the release time if we didn't trigger so triple taps don't trigger twice
+		tp->tap.saved_double_tap_time = time;
+	}
 }
 
 static void
@@ -136,6 +197,11 @@ tp_tap_notify(struct tp_dispatch *tp,
 		return;
 
 	tp_gesture_cancel(tp, time);
+
+	// if we have one finger, check if the tap was in the top corners
+	if (nfingers == 1) {
+		tp_corner_tap(tp, time, state);
+	}
 
 	button = button_map[tp->tap.map][nfingers - 1];
 
@@ -1603,6 +1669,17 @@ tp_init_tap(struct tp_dispatch *tp)
 	tp->tap.edges.right = (absx->maximum - edge_margin.x + absx->minimum);
 	tp->tap.edges.top = edge_margin.y;
 	tp->tap.edges.bottom = (absy->maximum - edge_margin.y + absy->minimum);
+
+	// height and width of the virtual tap buttons
+	int button_size = 7.5;
+
+	mm.x = button_size;
+	mm.y = button_size;
+	edge_margin = evdev_device_mm_to_units(device, &mm);
+
+	tp->corner_taps.top_area.bottom_edge = edge_margin.y;
+	tp->corner_taps.top_area.rightbutton_left_edge = absx->maximum - edge_margin.x + absx->minimum;
+	tp->corner_taps.top_area.leftbutton_right_edge = edge_margin.x;
 
 	snprintf(timer_name,
 		 sizeof(timer_name),
