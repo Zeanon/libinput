@@ -660,22 +660,19 @@ tp_init_top_softbuttons(struct tp_dispatch *tp,
 		   analysis has shown events to start down to ~10mm from the
 		   top - which maps to 15%.  We allow the caller to enlarge the
 		   area using a multiplier for the touchpad disabled case. */
-		// double topsize_mm = 10 * topbutton_size_mult;
+		double topsize_mm = 10 * topbutton_size_mult;
 		struct phys_coords mm;
 		double width, height;
 
 		evdev_device_get_size(device, &width, &height);
 
-		// mm.x = width * 0.60;
-		mm.x = width * 0.80;
-		// mm.y = topsize_mm;
-		mm.y = INT_MIN;
+		mm.x = width * 0.60;
+		mm.y = topsize_mm;
 		edges = evdev_device_mm_to_units(device, &mm);
 		tp->buttons.top_area.bottom_edge = edges.y;
 		tp->buttons.top_area.rightbutton_left_edge = edges.x;
 
-		// mm.x = width * 0.40;
-		mm.y = width * 0.20;
+		mm.x = width * 0.40;
 		edges = evdev_device_mm_to_units(device, &mm);
 		tp->buttons.top_area.leftbutton_right_edge = edges.x;
 	} else {
