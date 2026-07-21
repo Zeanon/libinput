@@ -597,13 +597,26 @@ tp_init_softbuttons(struct tp_dispatch *tp, struct evdev_device *device)
 	evdev_device_get_size(device, &width, &height);
 
 	/* button height: 10mm or 15% or the touchpad height,
-	   whichever is smaller */
-	// if (height * 0.15 > 10)
-	//	mm.y = height - 10;
-	if (height * 0.15 > 20)
-		mm.y = height - 20;
+	whichever is smaller */
+	if (height * 0.15 > 10)
+		mm.y = height - 10;
 	else
 		mm.y = height * 0.85;
+
+	double max_height = 0.0;
+	_unref_(quirks) *q = libinput_device_get_quirks(&device->base);
+	if (q) {
+		if (quirks_get_double(q, QUIRK_ATTR_SOFT_BUTTON_HEIGHT, &max_height)) {
+			if (max_height <= 0) {
+				evdev_log_bug_libinput(device,
+							"Soft button height %.2f is invalid\n",
+							max_height);
+			} else {
+				mm.y = height - max_height;
+			}
+		}
+
+	}
 
 	mm.x = width * 0.5;
 	edges = evdev_device_mm_to_units(device, &mm);
@@ -624,7 +637,23 @@ tp_init_softbuttons(struct tp_dispatch *tp, struct evdev_device *device)
 	 * On touchpads with visible markings we reduce the size of the
 	 * middle button since users have a visual guide.
 	 */
-	if (evdev_device_has_model_quirk(device, QUIRK_MODEL_TOUCHPAD_VISIBLE_MARKER)) {
+	double middle_button_width;
+
+	if (q && quirks_get_double(q, QUIRK_ATTR_MIDDLE_BUTTON_WIDTH, &middle_button_width)) {
+		if (middle_button_width <= 0) {
+			evdev_log_bug_libinput(device,
+						"middle button width %.2f is invalid\n",
+						middle_button_width);
+			return;
+		}
+		mm.x = width / 2 - (middle_button_width / 2);
+		edges = evdev_device_mm_to_units(device, &mm);
+		mb_le = edges.x;
+
+		mm.x = width / 2 + (middle_button_width / 2);
+		edges = evdev_device_mm_to_units(device, &mm);
+		mb_re = edges.x;
+	} else if (evdev_device_has_model_quirk(device, QUIRK_MODEL_TOUCHPAD_VISIBLE_MARKER)) {
 		mm.x = width / 2 - 5; /* 10mm wide */
 		edges = evdev_device_mm_to_units(device, &mm);
 		mb_le = edges.x;
@@ -633,13 +662,11 @@ tp_init_softbuttons(struct tp_dispatch *tp, struct evdev_device *device)
 		edges = evdev_device_mm_to_units(device, &mm);
 		mb_re = edges.x;
 	} else {
-		// mm.x = width * 0.375;
-		mm.x = width * 0.415;
+		mm.x = width * 0.375;
 		edges = evdev_device_mm_to_units(device, &mm);
 		mb_le = edges.x;
 
-		// mm.x = width * 0.625;
-		mm.x = width * 0.585;
+		mm.x = width * 0.625;
 		edges = evdev_device_mm_to_units(device, &mm);
 		mb_re = edges.x;
 	}

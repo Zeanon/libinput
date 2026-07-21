@@ -1,0 +1,6 @@
+[MSI Action Touchpad]
+MatchUdevType=touchpad
+MatchBus=i2c
+MatchVendor=0x06CB
+MatchProduct=0xD022
+ModelMSIActionTouchpad=1

@@ -181,6 +181,7 @@ struct evdev_device {
 	bool was_removed;
 	int fd;
 	enum evdev_device_seat_capability seat_caps;
+	enum evdev_device_seat_capability virtual_seat_caps;
 	enum evdev_device_tags tags;
 	bool is_mt;
 	bool is_suspended;
@@ -493,6 +494,10 @@ evdev_device_calibrate(struct evdev_device *device, const float calibration[6]);
 
 bool
 evdev_device_has_capability(struct evdev_device *device,
+			    enum libinput_device_capability capability);
+
+bool
+evdev_device_has_virtual_capability(struct evdev_device *device,
 			    enum libinput_device_capability capability);
 
 int

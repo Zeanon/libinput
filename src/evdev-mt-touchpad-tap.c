@@ -153,17 +153,20 @@ tp_corner_tap(struct tp_dispatch *tp,
 	/* check whether the last tap happened less than 180ms ago
 		if not it's not a double tap and we don't trigger the custom keys
 	*/
-	if (usec_cmp(usec_from_millis(180), usec_delta(time, tp->tap.saved_double_tap_time)) > 0) {
+	if (usec_cmp(DEFAULT_TAP_TIMEOUT_PERIOD, usec_delta(time, tp->tap.saved_double_tap_time)) > 0) {
+		uint32_t key;
 		keycode_t keycode;
 		struct libinput_device *device = &tp->device->base;
 
 		if (is_inside_top_left_corner(tp, t)) {
-			keycode = keycode_from_uint32_t(KEY_PROG3);
+			key = tp->corner_taps.top_area.left_key;
 		} else if (is_inside_top_right_corner(tp, t)) {
-			keycode = keycode_from_uint32_t(KEY_PROG4);
+			key = tp->corner_taps.top_area.right_key;
 		} else {
 			return;
 		}
+
+		keycode = keycode_from_uint32_t(key);
 
 		keyboard_notify_key(device,
 			time,
@@ -1626,6 +1629,50 @@ tp_tap_config_get_default_draglock_enabled(struct libinput_device *device)
 	return tp_drag_lock_default(evdev);
 }
 
+static void
+tp_init_action_buttons(struct tp_dispatch *tp, struct evdev_device *device, const struct input_absinfo *absx)
+{
+	// height and width of the virtual tap buttons
+	double button_width = 7.5;
+	double button_height = 7.5;
+
+	_unref_(quirks) *q = libinput_device_get_quirks(&device->base);
+	if (q) {
+		quirks_get_double(q, QUIRK_ATTR_ACTION_BUTTON_WIDTH, &button_width);
+		quirks_get_double(q, QUIRK_ATTR_ACTION_BUTTON_HEIGHT, &button_height);
+	}
+
+	if (button_width <= 0) {
+		evdev_log_bug_libinput(device,
+				       "Action button width %.2f is invalid\n",
+				       button_width);
+		return;
+	}
+
+	if (button_height <= 0) {
+		evdev_log_bug_libinput(device,
+				       "Action button height %.2f is invalid\n",
+				       button_height);
+		return;
+	}
+
+	struct phys_coords mm = { button_width, button_height };
+	struct device_coords edges = evdev_device_mm_to_units(device, &mm);
+
+	tp->corner_taps.top_area.bottom_edge = edges.y;
+	tp->corner_taps.top_area.rightbutton_left_edge = absx->maximum - edges.x + absx->minimum;
+	tp->corner_taps.top_area.leftbutton_right_edge = edges.x;
+
+	uint32_t left_key = KEY_PROG3;
+	uint32_t right_key = KEY_PROG4;
+
+	quirks_get_uint32(q, QUIRK_ATTR_LEFT_ACTION_BUTTON_CODE, &left_key);
+	quirks_get_uint32(q, QUIRK_ATTR_RIGHT_ACTION_BUTTON_CODE, &right_key);
+
+	tp->corner_taps.top_area.left_key = left_key;
+	tp->corner_taps.top_area.right_key = right_key;
+}
+
 void
 tp_init_tap(struct tp_dispatch *tp)
 {
@@ -1661,8 +1708,15 @@ tp_init_tap(struct tp_dispatch *tp)
 	const struct input_absinfo *absy = device->abs.absinfo_y;
 	assert(absx && absy);
 
-	// struct phys_coords mm = { 5.0, 5.0 };
-	struct phys_coords mm = { 1.0, 1.0 };
+	double margin = 5.0;
+
+	_unref_(quirks) *q = libinput_device_get_quirks(&device->base);
+	if (q) {
+		quirks_get_double(q, QUIRK_ATTR_EDGE_MARGIN, &margin);
+	}
+
+	struct phys_coords mm = { margin, margin };
+
 	struct device_coords edge_margin = evdev_device_mm_to_units(device, &mm);
 
 	tp->tap.edges.left = edge_margin.x;
@@ -1670,16 +1724,11 @@ tp_init_tap(struct tp_dispatch *tp)
 	tp->tap.edges.top = edge_margin.y;
 	tp->tap.edges.bottom = (absy->maximum - edge_margin.y + absy->minimum);
 
-	// height and width of the virtual tap buttons
-	int button_size = 7.5;
-
-	mm.x = button_size;
-	mm.y = button_size;
-	edge_margin = evdev_device_mm_to_units(device, &mm);
-
-	tp->corner_taps.top_area.bottom_edge = edge_margin.y;
-	tp->corner_taps.top_area.rightbutton_left_edge = absx->maximum - edge_margin.x + absx->minimum;
-	tp->corner_taps.top_area.leftbutton_right_edge = edge_margin.x;
+	if (evdev_device_has_model_quirk(device, QUIRK_MODEL_MSI_ACTION_TOUCHPAD)) {
+		tp_init_action_buttons(tp, device, absx);
+	} else {
+		tp->corner_taps.top_area.bottom_edge = INT_MIN;
+	}
 
 	snprintf(timer_name,
 		 sizeof(timer_name),
