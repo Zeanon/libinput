@@ -193,9 +193,10 @@ print_device_options(struct libinput_device *dev)
 	scroll_methods = libinput_device_config_scroll_get_methods(dev);
 	if (scroll_methods != LIBINPUT_CONFIG_SCROLL_NO_SCROLL) {
 		scroll = strdup_printf(
-			" scroll%s%s%s",
+			" scroll%s%s%s%s",
 			(scroll_methods & LIBINPUT_CONFIG_SCROLL_2FG) ? "-2fg" : "",
 			(scroll_methods & LIBINPUT_CONFIG_SCROLL_EDGE) ? "-edge" : "",
+			(scroll_methods & LIBINPUT_CONFIG_SCROLL_2FG_EDGE) ? "-2fg&edge" : "",
 			(scroll_methods & LIBINPUT_CONFIG_SCROLL_ON_BUTTON_DOWN)
 				? "-button"
 				: "");

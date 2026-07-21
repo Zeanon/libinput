@@ -86,7 +86,8 @@ static bool
 tp_thumb_in_exclusion_area(const struct tp_dispatch *tp, const struct tp_touch *t)
 {
 	return (t->point.y > tp->thumb.lower_thumb_line &&
-		tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE);
+		tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE &&
+		tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG_EDGE);
 }
 
 static bool
@@ -111,7 +112,8 @@ static bool
 tp_thumb_needs_jail(const struct tp_dispatch *tp, const struct tp_touch *t)
 {
 	if (t->point.y < tp->thumb.upper_thumb_line ||
-	    tp->scroll.method == LIBINPUT_CONFIG_SCROLL_EDGE)
+	    tp->scroll.method == LIBINPUT_CONFIG_SCROLL_EDGE ||
+		tp->scroll.method == LIBINPUT_CONFIG_SCROLL_2FG_EDGE)
 		return false;
 
 	if (!tp_thumb_in_exclusion_area(tp, t) &&

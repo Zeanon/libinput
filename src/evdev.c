@@ -2672,6 +2672,30 @@ evdev_device_has_capability(struct evdev_device *device,
 	}
 }
 
+bool
+evdev_device_has_virtual_capability(struct evdev_device *device,
+			    enum libinput_device_capability capability)
+{
+	switch (capability) {
+	case LIBINPUT_DEVICE_CAP_POINTER:
+		return !!(device->virtual_seat_caps & EVDEV_DEVICE_POINTER);
+	case LIBINPUT_DEVICE_CAP_KEYBOARD:
+		return !!(device->virtual_seat_caps & EVDEV_DEVICE_KEYBOARD);
+	case LIBINPUT_DEVICE_CAP_TOUCH:
+		return !!(device->virtual_seat_caps & EVDEV_DEVICE_TOUCH);
+	case LIBINPUT_DEVICE_CAP_GESTURE:
+		return !!(device->virtual_seat_caps & EVDEV_DEVICE_GESTURE);
+	case LIBINPUT_DEVICE_CAP_TABLET_TOOL:
+		return !!(device->virtual_seat_caps & EVDEV_DEVICE_TABLET);
+	case LIBINPUT_DEVICE_CAP_TABLET_PAD:
+		return !!(device->virtual_seat_caps & EVDEV_DEVICE_TABLET_PAD);
+	case LIBINPUT_DEVICE_CAP_SWITCH:
+		return !!(device->virtual_seat_caps & EVDEV_DEVICE_SWITCH);
+	default:
+		return false;
+	}
+}
+
 int
 evdev_device_get_size(const struct evdev_device *device, double *width, double *height)
 {

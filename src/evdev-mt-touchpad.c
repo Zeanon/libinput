@@ -3439,18 +3439,25 @@ tp_init_palmdetect_edge(struct tp_dispatch *tp, struct evdev_device *device)
 	if (width < 70.0)
 		return;
 
+	double max_margin = 8.0;
+
+	_unref_(quirks) *q = libinput_device_get_quirks(&device->base);
+	if (q) {
+		quirks_get_double(q, QUIRK_ATTR_MAX_PALM_DETECT_MARGIN, &max_margin);
+	}
+
 	/* palm edges are 8% of the width on each side */
-	mm.x = min(8, width * 0.08);
+	mm.x = min(max_margin, width * 0.08);
 	edges = evdev_device_mm_to_units(device, &mm);
 	tp->palm.left_edge = edges.x;
 
-	mm.x = width - min(8, width * 0.08);
+	mm.x = width - min(max_margin, width * 0.08);
 	edges = evdev_device_mm_to_units(device, &mm);
 	tp->palm.right_edge = edges.x;
 
 	if (!tp->buttons.has_topbuttons && height > 55) {
 		/* top edge is 5% of the height */
-		mm.y = height * 0.05;
+		mm.y = min(max_margin, height * 0.05);
 		edges = evdev_device_mm_to_units(device, &mm);
 		tp->palm.upper_edge = edges.y;
 	}
@@ -3826,7 +3833,9 @@ tp_init(struct tp_dispatch *tp, struct evdev_device *device)
 		tp->jump.detection_disabled = true;
 
 	device->seat_caps |= EVDEV_DEVICE_POINTER;
-	device->seat_caps |= EVDEV_DEVICE_KEYBOARD;
+	if (evdev_device_has_model_quirk(device, QUIRK_MODEL_MSI_ACTION_TOUCHPAD)) {
+		device->virtual_seat_caps |= EVDEV_DEVICE_KEYBOARD;
+	}
 	if (tp->gesture.enabled)
 		device->seat_caps |= EVDEV_DEVICE_GESTURE;
 

@@ -74,7 +74,7 @@ tp_touch_get_edge(const struct tp_dispatch *tp, const struct tp_touch *t)
 {
 	uint32_t edge = EDGE_NONE;
 
-	if (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE)
+	if (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE && tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG_EDGE)
 		return EDGE_NONE;
 
 	if (t->point.x > tp->scroll.right_edge)
@@ -376,7 +376,7 @@ tp_edge_scroll_handle_state(struct tp_dispatch *tp, usec_t time)
 {
 	struct tp_touch *t;
 
-	if (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE) {
+	if (tp->scroll.method != LIBINPUT_CONFIG_SCROLL_EDGE && tp->scroll.method != LIBINPUT_CONFIG_SCROLL_2FG_EDGE) {
 		tp_for_each_touch(tp, t) {
 			if (t->state == TOUCH_BEGIN)
 				t->scroll.edge_state = EDGE_SCROLL_TOUCH_STATE_AREA;

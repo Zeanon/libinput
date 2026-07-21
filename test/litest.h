@@ -1569,6 +1569,21 @@ litest_enable_edge_scroll(struct litest_device *dev)
 	libinput_device_config_scroll_set_natural_scroll_enabled(device, 0);
 }
 
+static inline void
+litest_enable_2fg_edge_scroll(struct litest_device *dev)
+{
+	enum libinput_config_status status, expected;
+	struct libinput_device *device = dev->libinput_device;
+
+	status = libinput_device_config_scroll_set_method(device,
+							  LIBINPUT_CONFIG_SCROLL_2FG_EDGE);
+
+	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
+	litest_assert_int_eq(status, expected);
+
+	libinput_device_config_scroll_set_natural_scroll_enabled(device, 0);
+}
+
 static inline bool
 litest_has_clickfinger(struct litest_device *dev)
 {

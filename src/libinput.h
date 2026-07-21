@@ -4493,6 +4493,10 @@ int
 libinput_device_has_capability(struct libinput_device *device,
 			       enum libinput_device_capability capability);
 
+int
+libinput_device_has_virtual_capability(struct libinput_device *device,
+			       enum libinput_device_capability capability);
+
 /**
  * @ingroup device
  *
@@ -6435,6 +6439,10 @@ enum libinput_config_scroll_method {
 	 * along a scroll-capable axis.
 	 */
 	LIBINPUT_CONFIG_SCROLL_ON_BUTTON_DOWN = (1 << 2),
+	/**
+	 * Allow both 2 finger scroll and edge scroll to be used simultaneously
+	 */
+	LIBINPUT_CONFIG_SCROLL_2FG_EDGE = (1 << 3),
 };
 
 /**

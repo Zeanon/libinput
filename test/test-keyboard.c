@@ -457,6 +457,9 @@ START_TEST(keyboard_no_scroll)
 	status = libinput_device_config_scroll_set_method(device,
 							  LIBINPUT_CONFIG_SCROLL_EDGE);
 	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_UNSUPPORTED);
+	status = libinput_device_config_scroll_set_method(device,
+							  LIBINPUT_CONFIG_SCROLL_2FG_EDGE);
+	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_UNSUPPORTED);
 	status = libinput_device_config_scroll_set_method(
 		device,
 		LIBINPUT_CONFIG_SCROLL_ON_BUTTON_DOWN);

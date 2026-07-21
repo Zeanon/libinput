@@ -296,6 +296,8 @@ quirk_get_name(enum quirk q)
 		return "ModelTrackball";
 	case QUIRK_MODEL_WACOM_TOUCHPAD:
 		return "ModelWacomTouchpad";
+	case QUIRK_MODEL_MSI_ACTION_TOUCHPAD:
+		return "ModelMSIActionTouchpad";
 
 	case QUIRK_ATTR_SIZE_HINT:
 		return "AttrSizeHint";
@@ -335,6 +337,22 @@ quirk_get_name(enum quirk q)
 		return "AttrInputProp";
 	case QUIRK_ATTR_IS_VIRTUAL:
 		return "AttrIsVirtual";
+	case QUIRK_ATTR_EDGE_MARGIN:
+		return "AttrEdgeMargin";
+	case QUIRK_ATTR_MAX_PALM_DETECT_MARGIN:
+		return "AttrMaxPalmDetectMargin";
+	case QUIRK_ATTR_SOFT_BUTTON_HEIGHT:
+		return "AttrSoftButtonHeight";
+	case QUIRK_ATTR_MIDDLE_BUTTON_WIDTH:
+		return "AttrMiddleButtonWidth";
+	case QUIRK_ATTR_ACTION_BUTTON_WIDTH:
+		return "AttrActionButtonWidth";
+	case QUIRK_ATTR_ACTION_BUTTON_HEIGHT:
+		return "AttrActionButtonHeight";
+	case QUIRK_ATTR_LEFT_ACTION_BUTTON_CODE:
+		return "AttrLeftActionButtonCode";
+	case QUIRK_ATTR_RIGHT_ACTION_BUTTON_CODE:
+		return "AttrRightActionButtonCode";
 	default:
 		abort();
 	}
@@ -944,6 +962,62 @@ parse_attr(struct quirks_context *ctx,
 			goto out;
 		p->type = PT_BOOL;
 		p->value.b = b;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_EDGE_MARGIN))) {
+		p->id = QUIRK_ATTR_EDGE_MARGIN;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_MAX_PALM_DETECT_MARGIN))) {
+		p->id = QUIRK_ATTR_MAX_PALM_DETECT_MARGIN;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_SOFT_BUTTON_HEIGHT))) {
+		p->id = QUIRK_ATTR_SOFT_BUTTON_HEIGHT;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_MIDDLE_BUTTON_WIDTH))) {
+		p->id = QUIRK_ATTR_MIDDLE_BUTTON_WIDTH;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_ACTION_BUTTON_WIDTH))) {
+		p->id = QUIRK_ATTR_ACTION_BUTTON_WIDTH;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_ACTION_BUTTON_HEIGHT))) {
+		p->id = QUIRK_ATTR_ACTION_BUTTON_HEIGHT;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_LEFT_ACTION_BUTTON_CODE))) {
+		p->id = QUIRK_ATTR_LEFT_ACTION_BUTTON_CODE;
+		if (!safe_atou(value, &v))
+			goto out;
+		p->type = PT_UINT;
+		p->value.u = v;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_RIGHT_ACTION_BUTTON_CODE))) {
+		p->id = QUIRK_ATTR_RIGHT_ACTION_BUTTON_CODE;
+		if (!safe_atou(value, &v))
+			goto out;
+		p->type = PT_UINT;
+		p->value.u = v;
 		rc = true;
 	} else {
 		qlog_error(ctx, "Unknown key %s in %s\n", key, s->name);

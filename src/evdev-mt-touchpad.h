@@ -423,12 +423,16 @@ struct tp_dispatch {
 			int32_t top_edge;               /* in device coordinates */
 			int32_t rightbutton_left_edge;  /* in device coordinates */
 			int32_t leftbutton_right_edge; /* in device coordinates */
+			uint32_t left_key;
+			uint32_t right_key;
 		} bottom_area;
 
 		struct {
 			int32_t bottom_edge;           /* in device coordinates */
 			int32_t rightbutton_left_edge; /* in device coordinates */
 			int32_t leftbutton_right_edge; /* in device coordinates */
+			uint32_t left_key;
+			uint32_t right_key;
 		} top_area;
 	} corner_taps;
 

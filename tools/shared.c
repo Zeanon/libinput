@@ -272,6 +272,8 @@ tools_parse_option(int option, const char *optarg, struct tools_options *options
 			options->scroll_method = LIBINPUT_CONFIG_SCROLL_2FG;
 		} else if (streq(optarg, "edge")) {
 			options->scroll_method = LIBINPUT_CONFIG_SCROLL_EDGE;
+		} else if (streq(optarg, "twofinger&edge")) {
+			options->scroll_method = LIBINPUT_CONFIG_SCROLL_2FG_EDGE;
 		} else if (streq(optarg, "button")) {
 			options->scroll_method = LIBINPUT_CONFIG_SCROLL_ON_BUTTON_DOWN;
 		} else {
@@ -1015,6 +1017,8 @@ tools_list_device_quirks(struct quirks_context *ctx,
 			case QUIRK_ATTR_PALM_PRESSURE_THRESHOLD:
 			case QUIRK_ATTR_THUMB_PRESSURE_THRESHOLD:
 			case QUIRK_ATTR_THUMB_SIZE_THRESHOLD:
+			case QUIRK_ATTR_LEFT_ACTION_BUTTON_CODE:
+			case QUIRK_ATTR_RIGHT_ACTION_BUTTON_CODE:
 				quirks_get_uint32(quirks, q, &v);
 				snprintf(buf, sizeof(buf), "%s=%u", name, v);
 				callback(userdata, buf);
@@ -1029,6 +1033,12 @@ tools_list_device_quirks(struct quirks_context *ctx,
 				callback(userdata, buf);
 				break;
 			case QUIRK_ATTR_TRACKPOINT_MULTIPLIER:
+			case QUIRK_ATTR_EDGE_MARGIN:
+			case QUIRK_ATTR_MAX_PALM_DETECT_MARGIN:
+			case QUIRK_ATTR_SOFT_BUTTON_HEIGHT:
+			case QUIRK_ATTR_MIDDLE_BUTTON_WIDTH:
+			case QUIRK_ATTR_ACTION_BUTTON_WIDTH:
+			case QUIRK_ATTR_ACTION_BUTTON_HEIGHT:
 				quirks_get_double(quirks, q, &d);
 				snprintf(buf, sizeof(buf), "%s=%0.2f", name, d);
 				callback(userdata, buf);

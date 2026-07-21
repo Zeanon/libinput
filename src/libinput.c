@@ -2426,6 +2426,9 @@ device_has_cap(struct libinput_device *device, enum libinput_device_capability c
 	if (libinput_device_has_capability(device, cap))
 		return true;
 
+	if (libinput_device_has_virtual_capability(device, cap))
+		return true;
+	
 	switch (cap) {
 	case LIBINPUT_DEVICE_CAP_POINTER:
 		capability = "CAP_POINTER";
@@ -2466,6 +2469,8 @@ keyboard_notify_key(struct libinput_device *device,
 {
 	struct libinput_event_keyboard *key_event;
 	uint32_t seat_key_count;
+
+	//TODO
 
 	if (!device_has_cap(device, LIBINPUT_DEVICE_CAP_KEYBOARD))
 		return;
@@ -3457,6 +3462,13 @@ libinput_device_has_capability(struct libinput_device *device,
 			       enum libinput_device_capability capability)
 {
 	return evdev_device_has_capability((struct evdev_device *)device, capability);
+}
+
+LIBINPUT_EXPORT int
+libinput_device_has_virtual_capability(struct libinput_device *device,
+			       enum libinput_device_capability capability)
+{
+	return evdev_device_has_virtual_capability((struct evdev_device *)device, capability);
 }
 
 LIBINPUT_EXPORT int
@@ -4793,6 +4805,7 @@ libinput_device_config_scroll_set_method(struct libinput_device *device,
 	case LIBINPUT_CONFIG_SCROLL_NO_SCROLL:
 	case LIBINPUT_CONFIG_SCROLL_2FG:
 	case LIBINPUT_CONFIG_SCROLL_EDGE:
+	case LIBINPUT_CONFIG_SCROLL_2FG_EDGE:
 	case LIBINPUT_CONFIG_SCROLL_ON_BUTTON_DOWN:
 		break;
 	default:
