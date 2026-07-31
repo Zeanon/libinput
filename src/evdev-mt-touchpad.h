@@ -282,6 +282,11 @@ struct tp_touch {
 		double last_speed; /* speed in mm/s at last sample */
 		unsigned int exceeded_count;
 	} speed;
+
+	struct {
+		double cumulative_distance_mm;
+		bool distance_exceeded;
+	} dwt;
 };
 
 enum suspend_trigger {
@@ -742,6 +747,9 @@ tp_edge_scroll_post_events(struct tp_dispatch *tp, usec_t time);
 void
 tp_edge_scroll_stop_events(struct tp_dispatch *tp, usec_t time);
 
+bool
+tp_edge_scroll_is_active(const struct tp_dispatch *tp);
+
 int
 tp_edge_scroll_touch_active(const struct tp_dispatch *tp, const struct tp_touch *t);
 
@@ -762,6 +770,9 @@ tp_remove_gesture(struct tp_dispatch *tp);
 
 void
 tp_gesture_stop(struct tp_dispatch *tp, usec_t time);
+
+bool
+tp_gesture_is_active(const struct tp_dispatch *tp);
 
 void
 tp_gesture_cancel(struct tp_dispatch *tp, usec_t time);

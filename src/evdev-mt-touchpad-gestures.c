@@ -191,7 +191,9 @@ tp_get_raw_pointer_motion(struct tp_dispatch *tp)
 }
 
 static bool
-tp_has_pending_pointer_motion(struct tp_dispatch *tp, usec_t time)
+tp_has_pending_pointer_motion(struct tp_dispatch *tp,
+			      usec_t time,
+			      struct device_float_coords *delta_out)
 {
 	struct device_float_coords raw;
 
@@ -204,6 +206,8 @@ tp_has_pending_pointer_motion(struct tp_dispatch *tp, usec_t time)
 	 * event.
 	 */
 	raw = tp_get_raw_pointer_motion(tp);
+	if (delta_out)
+		*delta_out = raw;
 	return !device_float_is_zero(raw);
 }
 
@@ -211,12 +215,9 @@ static void
 tp_gesture_post_pointer_motion(struct tp_dispatch *tp, usec_t time)
 {
 	struct device_float_coords raw;
-	struct normalized_coords delta;
 
-	raw = tp_get_raw_pointer_motion(tp);
-	delta = tp_filter_motion(tp, &raw, time);
-
-	if (!normalized_is_zero(delta) || !device_float_is_zero(raw)) {
+	if (tp_has_pending_pointer_motion(tp, time, &raw)) {
+		struct normalized_coords delta = tp_filter_motion(tp, &raw, time);
 		struct device_float_coords unaccel;
 
 		unaccel = tp_scale_to_xaxis(tp, raw);
@@ -1378,7 +1379,7 @@ tp_gesture_detect_motion_gestures(struct tp_dispatch *tp, usec_t time)
 	first_mm = hypot(first_moved.x, first_moved.y);
 
 	if (tp->gesture.finger_count == 1) {
-		if (!tp_has_pending_pointer_motion(tp, time))
+		if (!tp_has_pending_pointer_motion(tp, time, NULL))
 			return;
 
 		is_hold_and_motion = (first_mm < HOLD_AND_MOTION_THRESHOLD);
@@ -2118,6 +2119,33 @@ tp_gesture_end(struct tp_dispatch *tp, usec_t time, enum gesture_cancelled cance
 		}
 		break;
 	}
+}
+
+bool
+tp_gesture_is_active(const struct tp_dispatch *tp)
+{
+	switch (tp->gesture.state) {
+	case GESTURE_STATE_NONE:
+	case GESTURE_STATE_UNKNOWN:
+	case GESTURE_STATE_HOLD:
+	case GESTURE_STATE_HOLD_AND_MOTION:
+	case GESTURE_STATE_POINTER_MOTION:
+		return false;
+	case GESTURE_STATE_SCROLL_START:
+	case GESTURE_STATE_SCROLL:
+	case GESTURE_STATE_PINCH_START:
+	case GESTURE_STATE_PINCH:
+	case GESTURE_STATE_SWIPE_START:
+	case GESTURE_STATE_SWIPE:
+	case GESTURE_STATE_3FG_DRAG_OR_SWIPE_START:
+	case GESTURE_STATE_3FG_DRAG_OR_SWIPE:
+	case GESTURE_STATE_3FG_DRAG_START:
+	case GESTURE_STATE_3FG_DRAG:
+	case GESTURE_STATE_3FG_DRAG_RELEASED:
+		return true;
+	}
+
+	return false;
 }
 
 void
