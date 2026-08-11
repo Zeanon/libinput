@@ -2470,8 +2470,6 @@ keyboard_notify_key(struct libinput_device *device,
 	struct libinput_event_keyboard *key_event;
 	uint32_t seat_key_count;
 
-	//TODO
-
 	if (!device_has_cap(device, LIBINPUT_DEVICE_CAP_KEYBOARD))
 		return;
 

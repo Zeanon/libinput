@@ -74,8 +74,6 @@ enum evdev_usage {
 	EVDEV_BTN_0 = _evbit(EV_KEY, BTN_0),
 	EVDEV_BTN_1 = _evbit(EV_KEY, BTN_1),
 	EVDEV_BTN_2 = _evbit(EV_KEY, BTN_2),
-	//EVDEV_BTN_4 = _evbit(EV_KEY, BTN_4),
-	//EVDEV_BTN_5 = _evbit(EV_KEY, BTN_5),
 
 	EVDEV_BTN_STYLUS = _evbit(EV_KEY, BTN_STYLUS),
 	EVDEV_BTN_STYLUS2 = _evbit(EV_KEY, BTN_STYLUS2),
