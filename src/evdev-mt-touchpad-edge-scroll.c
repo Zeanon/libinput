@@ -322,7 +322,7 @@ tp_edge_scroll_init(struct tp_dispatch *tp, struct evdev_device *device)
 	quirks_get_double(q, QUIRK_ATTR_EDGE_SCROLL_MARGIN, &margin);
 	if (margin < 0) {
 		evdev_log_bug_libinput(device,
-				       "Edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       "Edge scroll margin %.2f is invalid\nIt has to be greater than or equal to zero\n",
 				       margin);
 		margin = 7;
 	}
@@ -333,13 +333,13 @@ tp_edge_scroll_init(struct tp_dispatch *tp, struct evdev_device *device)
 	quirks_get_double(q, QUIRK_ATTR_EDGE_SCROLL_HORIZONTAL_MARGIN, &horizontal_margin);
 	if (vertical_margin < 0) {
 		evdev_log_bug_libinput(device,
-				       "Vertical edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       "Vertical edge scroll margin %.2f is invalid\nIt has to be greater than or equal to zero\n",
 				       vertical_margin);
 		vertical_margin = margin;
 	}
 	if (horizontal_margin < 0) {
 		evdev_log_bug_libinput(device,
-				       "Horizontal edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       "Horizontal edge scroll margin %.2f is invalid\nIt has to be greater than or equal to zero\n",
 				       horizontal_margin);
 		horizontal_margin = margin;
 	}
@@ -354,25 +354,25 @@ tp_edge_scroll_init(struct tp_dispatch *tp, struct evdev_device *device)
 	quirks_get_double(q, QUIRK_ATTR_EDGE_SCROLL_TOP_MARGIN, &top_margin);
 	if (right_margin < 0) {
 		evdev_log_bug_libinput(device,
-				       "Right edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       "Right edge scroll margin %.2f is invalid\nIt has to be greater than or equal to zero\n",
 				       right_margin);
 		right_margin = vertical_margin;
 	}
 	if (left_margin < 0) {
 		evdev_log_bug_libinput(device,
-				       "Left edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       "Left edge scroll margin %.2f is invalid\nIt has to be greater than or equal to zero\n",
 				       left_margin);
 		left_margin = vertical_margin;
 	}
 	if (bottom_margin < 0) {
 		evdev_log_bug_libinput(device,
-				       "Bottom edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       "Bottom edge scroll margin %.2f is invalid\nIt has to be greater than or equal to zero\n",
 				       bottom_margin);
 		bottom_margin = horizontal_margin;
 	}
 	if (top_margin < 0) {
 		evdev_log_bug_libinput(device,
-				       "Top edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       "Top edge scroll margin %.2f is invalid\nIt has to be greater than or equal to zero\n",
 				       top_margin);
 		top_margin = horizontal_margin;
 	}

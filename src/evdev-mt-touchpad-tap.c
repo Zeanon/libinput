@@ -1648,14 +1648,14 @@ tp_init_action_buttons(struct tp_dispatch *tp, struct evdev_device *device, cons
 
 	if (button_width < 0) {
 		evdev_log_bug_libinput(device,
-				       "Action button width %.2f is invalid\nIt has to be greater than zero\n",
+				       "Action button width %.2f is invalid\nIt has to be greater than or equal to zero\n",
 				       button_width);
 		return;
 	}
 
 	if (button_height < 0) {
 		evdev_log_bug_libinput(device,
-				       "Action button height %.2f is invalid\nIt has to be greater than zero\n",
+				       "Action button height %.2f is invalid\nIt has to be greater than or equal to zero\n",
 				       button_height);
 		return;
 	}

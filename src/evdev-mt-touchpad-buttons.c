@@ -609,7 +609,7 @@ tp_init_softbuttons(struct tp_dispatch *tp, struct evdev_device *device)
 	if (quirks_get_double(q, QUIRK_ATTR_SOFT_BUTTON_HEIGHT, &button_height)) {
 		if (button_height < 0) {
 			evdev_log_bug_libinput(device,
-						"Soft button height %.2f is invalid\nIt has to be greater than zero\n",
+						"Soft button height %.2f is invalid\nIt has to be greater than or equal to zero\n",
 						button_height);
 		} else {
 			mm.y = height - button_height;
@@ -657,7 +657,7 @@ tp_init_softbuttons(struct tp_dispatch *tp, struct evdev_device *device)
 	if (quirks_get_double(q, QUIRK_ATTR_MIDDLE_BUTTON_WIDTH, &middle_button_width)) {
 		if (middle_button_width < 0) {
 			evdev_log_bug_libinput(device,
-						"middle button width %.2f is invalid\nIt has to be greater than zero\n",
+						"middle button width %.2f is invalid\nIt has to be greater than or equal to zero\n",
 						middle_button_width);
 		} else {
 			mm.x = width / 2 - (middle_button_width / 2);
