@@ -298,6 +298,8 @@ tp_edge_scroll_handle_timeout(usec_t now, void *data)
 void
 tp_edge_scroll_init(struct tp_dispatch *tp, struct evdev_device *device)
 {
+	_unref_(quirks) *q = libinput_device_get_quirks(&device->base);
+
 	struct tp_touch *t;
 	double width, height;
 	bool want_horiz_scroll = true;
@@ -315,13 +317,73 @@ tp_edge_scroll_init(struct tp_dispatch *tp, struct evdev_device *device)
 	if (!tp->buttons.is_clickpad)
 		want_horiz_scroll = (height >= 40);
 
+	//TODO Ensure margins are >= 0
+	double margin = 7;
+	quirks_get_double(q, QUIRK_ATTR_EDGE_SCROLL_MARGIN, &margin);
+	if (margin < 0) {
+		evdev_log_bug_libinput(device,
+				       "Edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       margin);
+		margin = 7;
+	}
+
+	double vertical_margin = margin;
+	double horizontal_margin = margin;
+	quirks_get_double(q, QUIRK_ATTR_EDGE_SCROLL_VERTICAL_MARGIN, &vertical_margin);
+	quirks_get_double(q, QUIRK_ATTR_EDGE_SCROLL_HORIZONTAL_MARGIN, &horizontal_margin);
+	if (vertical_margin < 0) {
+		evdev_log_bug_libinput(device,
+				       "Vertical edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       vertical_margin);
+		vertical_margin = margin;
+	}
+	if (horizontal_margin < 0) {
+		evdev_log_bug_libinput(device,
+				       "Horizontal edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       horizontal_margin);
+		horizontal_margin = margin;
+	}
+
+	double right_margin = vertical_margin;
+	double left_margin = vertical_margin;
+	double bottom_margin = horizontal_margin;
+	double top_margin = horizontal_margin;
+	quirks_get_double(q, QUIRK_ATTR_EDGE_SCROLL_RIGHT_MARGIN, &right_margin);
+	quirks_get_double(q, QUIRK_ATTR_EDGE_SCROLL_LEFT_MARGIN, &left_margin);
+	quirks_get_double(q, QUIRK_ATTR_EDGE_SCROLL_BOTTOM_MARGIN, &bottom_margin);
+	quirks_get_double(q, QUIRK_ATTR_EDGE_SCROLL_TOP_MARGIN, &top_margin);
+	if (right_margin < 0) {
+		evdev_log_bug_libinput(device,
+				       "Right edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       right_margin);
+		right_margin = vertical_margin;
+	}
+	if (left_margin < 0) {
+		evdev_log_bug_libinput(device,
+				       "Left edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       left_margin);
+		left_margin = vertical_margin;
+	}
+	if (bottom_margin < 0) {
+		evdev_log_bug_libinput(device,
+				       "Bottom edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       bottom_margin);
+		bottom_margin = horizontal_margin;
+	}
+	if (top_margin < 0) {
+		evdev_log_bug_libinput(device,
+				       "Top edge scroll margin %.2f is invalid\nIt has to be greater than zero\n",
+				       top_margin);
+		top_margin = horizontal_margin;
+	}
+	
 	/* 7mm edge size */
 	//mm.x = width - 7;
 	// Right Edge
-	mm.x = width - 3;
+	mm.x = width - right_margin;
 	//mm.y = height - 7;
 	// Bottom Edge
-	mm.y = height - 2;
+	mm.y = height - bottom_margin;
 	edges = evdev_device_mm_to_units(device, &mm);
 
 	tp->scroll.right_edge = edges.x;
@@ -331,9 +393,9 @@ tp_edge_scroll_init(struct tp_dispatch *tp, struct evdev_device *device)
 		tp->scroll.bottom_edge = INT_MAX;
 
 	// Left Edge
-	mm.x = 3;
+	mm.x = left_margin;
 	// Top Edge
-	mm.y = 3;
+	mm.y = top_margin;
 	edges = evdev_device_mm_to_units(device, &mm);
 
 	tp->scroll.left_edge = edges.x;

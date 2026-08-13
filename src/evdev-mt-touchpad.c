@@ -3502,11 +3502,9 @@ tp_init_palmdetect_edge(struct tp_dispatch *tp, struct evdev_device *device)
 		return;
 
 	double max_margin = 8.0;
-
-	_unref_(quirks) *q = libinput_device_get_quirks(&device->base);
-	if (q) {
-		quirks_get_double(q, QUIRK_ATTR_MAX_PALM_DETECT_MARGIN, &max_margin);
-	}
+	quirks_get_double(libinput_device_get_quirks(&device->base),
+					  QUIRK_ATTR_MAX_PALM_DETECT_MARGIN,
+					  &max_margin);
 
 	/* palm edges are 8% of the width on each side */
 	mm.x = min(max_margin, width * 0.08);

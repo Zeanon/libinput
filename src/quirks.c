@@ -341,6 +341,20 @@ quirk_get_name(enum quirk q)
 		return "AttrEdgeMargin";
 	case QUIRK_ATTR_MAX_PALM_DETECT_MARGIN:
 		return "AttrMaxPalmDetectMargin";
+	case QUIRK_ATTR_EDGE_SCROLL_MARGIN:
+		return "AttrEdgeScrollMargin";
+	case QUIRK_ATTR_EDGE_SCROLL_VERTICAL_MARGIN:
+		return "AttrEdgeScrollVerticalMargin";
+	case QUIRK_ATTR_EDGE_SCROLL_HORIZONTAL_MARGIN:
+		return "AttrEdgeScrollHorizontalMargin";
+	case QUIRK_ATTR_EDGE_SCROLL_RIGHT_MARGIN:
+		return "AttrEdgeScrollRightMargin";
+	case QUIRK_ATTR_EDGE_SCROLL_BOTTOM_MARGIN:
+		return "AttrEdgeScrollBottomMargin";
+	case QUIRK_ATTR_EDGE_SCROLL_LEFT_MARGIN:
+		return "AttrEdgeScrollLeftMargin";
+	case QUIRK_ATTR_EDGE_SCROLL_TOP_MARGIN:
+		return "AttrEdgeScrollTopMargin";
 	case QUIRK_ATTR_SOFT_BUTTON_HEIGHT:
 		return "AttrSoftButtonHeight";
 	case QUIRK_ATTR_MIDDLE_BUTTON_WIDTH:
@@ -972,6 +986,55 @@ parse_attr(struct quirks_context *ctx,
 		rc = true;
 	} else if (streq(key, quirk_get_name(QUIRK_ATTR_MAX_PALM_DETECT_MARGIN))) {
 		p->id = QUIRK_ATTR_MAX_PALM_DETECT_MARGIN;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_EDGE_SCROLL_MARGIN))) {
+		p->id = QUIRK_ATTR_EDGE_SCROLL_MARGIN;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_EDGE_SCROLL_VERTICAL_MARGIN))) {
+		p->id = QUIRK_ATTR_EDGE_SCROLL_VERTICAL_MARGIN;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_EDGE_SCROLL_HORIZONTAL_MARGIN))) {
+		p->id = QUIRK_ATTR_EDGE_SCROLL_HORIZONTAL_MARGIN;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_EDGE_SCROLL_RIGHT_MARGIN))) {
+		p->id = QUIRK_ATTR_EDGE_SCROLL_RIGHT_MARGIN;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_EDGE_SCROLL_BOTTOM_MARGIN))) {
+		p->id = QUIRK_ATTR_EDGE_SCROLL_BOTTOM_MARGIN;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_EDGE_SCROLL_LEFT_MARGIN))) {
+		p->id = QUIRK_ATTR_EDGE_SCROLL_LEFT_MARGIN;
+		if (!safe_atod(value, &d))
+			goto out;
+		p->type = PT_DOUBLE;
+		p->value.d = d;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_EDGE_SCROLL_TOP_MARGIN))) {
+		p->id = QUIRK_ATTR_EDGE_SCROLL_TOP_MARGIN;
 		if (!safe_atod(value, &d))
 			goto out;
 		p->type = PT_DOUBLE;

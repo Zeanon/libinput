@@ -589,6 +589,8 @@ tp_release_all_buttons(struct tp_dispatch *tp, usec_t time)
 static void
 tp_init_softbuttons(struct tp_dispatch *tp, struct evdev_device *device)
 {
+	_unref_(quirks) *q = libinput_device_get_quirks(&device->base);
+
 	double width, height;
 	struct device_coords edges;
 	int mb_le, mb_re; /* middle button left/right edge */
@@ -603,19 +605,15 @@ tp_init_softbuttons(struct tp_dispatch *tp, struct evdev_device *device)
 	else
 		mm.y = height * 0.85;
 
-	double max_height = 0.0;
-	_unref_(quirks) *q = libinput_device_get_quirks(&device->base);
-	if (q) {
-		if (quirks_get_double(q, QUIRK_ATTR_SOFT_BUTTON_HEIGHT, &max_height)) {
-			if (max_height <= 0) {
-				evdev_log_bug_libinput(device,
-							"Soft button height %.2f is invalid\n",
-							max_height);
-			} else {
-				mm.y = height - max_height;
-			}
+	double button_height = 0.0;
+	if (quirks_get_double(q, QUIRK_ATTR_SOFT_BUTTON_HEIGHT, &button_height)) {
+		if (button_height < 0) {
+			evdev_log_bug_libinput(device,
+						"Soft button height %.2f is invalid\nIt has to be greater than zero\n",
+						button_height);
+		} else {
+			mm.y = height - button_height;
 		}
-
 	}
 
 	mm.x = width * 0.5;
@@ -637,23 +635,7 @@ tp_init_softbuttons(struct tp_dispatch *tp, struct evdev_device *device)
 	 * On touchpads with visible markings we reduce the size of the
 	 * middle button since users have a visual guide.
 	 */
-	double middle_button_width;
-
-	if (q && quirks_get_double(q, QUIRK_ATTR_MIDDLE_BUTTON_WIDTH, &middle_button_width)) {
-		if (middle_button_width <= 0) {
-			evdev_log_bug_libinput(device,
-						"middle button width %.2f is invalid\n",
-						middle_button_width);
-			return;
-		}
-		mm.x = width / 2 - (middle_button_width / 2);
-		edges = evdev_device_mm_to_units(device, &mm);
-		mb_le = edges.x;
-
-		mm.x = width / 2 + (middle_button_width / 2);
-		edges = evdev_device_mm_to_units(device, &mm);
-		mb_re = edges.x;
-	} else if (evdev_device_has_model_quirk(device, QUIRK_MODEL_TOUCHPAD_VISIBLE_MARKER)) {
+	if (evdev_device_has_model_quirk(device, QUIRK_MODEL_TOUCHPAD_VISIBLE_MARKER)) {
 		mm.x = width / 2 - 5; /* 10mm wide */
 		edges = evdev_device_mm_to_units(device, &mm);
 		mb_le = edges.x;
@@ -669,6 +651,23 @@ tp_init_softbuttons(struct tp_dispatch *tp, struct evdev_device *device)
 		mm.x = width * 0.625;
 		edges = evdev_device_mm_to_units(device, &mm);
 		mb_re = edges.x;
+	}
+
+	double middle_button_width;
+	if (quirks_get_double(q, QUIRK_ATTR_MIDDLE_BUTTON_WIDTH, &middle_button_width)) {
+		if (middle_button_width < 0) {
+			evdev_log_bug_libinput(device,
+						"middle button width %.2f is invalid\nIt has to be greater than zero\n",
+						middle_button_width);
+		} else {
+			mm.x = width / 2 - (middle_button_width / 2);
+			edges = evdev_device_mm_to_units(device, &mm);
+			mb_le = edges.x;
+
+			mm.x = width / 2 + (middle_button_width / 2);
+			edges = evdev_device_mm_to_units(device, &mm);
+			mb_re = edges.x;
+		}
 	}
 
 	tp->buttons.bottom_area.middlebutton_left_edge = mb_le;
