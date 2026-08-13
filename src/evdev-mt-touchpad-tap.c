@@ -1636,22 +1636,26 @@ tp_init_action_buttons(struct tp_dispatch *tp, struct evdev_device *device, cons
 	double button_width = 7.5;
 	double button_height = 7.5;
 
-	_unref_(quirks) *q = libinput_device_get_quirks(&device->base);
-	if (q) {
-		quirks_get_double(q, QUIRK_ATTR_ACTION_BUTTON_WIDTH, &button_width);
-		quirks_get_double(q, QUIRK_ATTR_ACTION_BUTTON_HEIGHT, &button_height);
-	}
+	uint32_t left_key = KEY_PROG3;
+	uint32_t right_key = KEY_PROG4;
 
-	if (button_width <= 0) {
+	_unref_(quirks) *q = libinput_device_get_quirks(&device->base);
+	quirks_get_double(q, QUIRK_ATTR_ACTION_BUTTON_WIDTH, &button_width);
+	quirks_get_double(q, QUIRK_ATTR_ACTION_BUTTON_HEIGHT, &button_height);
+
+	quirks_get_uint32(q, QUIRK_ATTR_LEFT_ACTION_BUTTON_CODE, &left_key);
+	quirks_get_uint32(q, QUIRK_ATTR_RIGHT_ACTION_BUTTON_CODE, &right_key);
+
+	if (button_width < 0) {
 		evdev_log_bug_libinput(device,
-				       "Action button width %.2f is invalid\n",
+				       "Action button width %.2f is invalid\nIt has to be greater than zero\n",
 				       button_width);
 		return;
 	}
 
-	if (button_height <= 0) {
+	if (button_height < 0) {
 		evdev_log_bug_libinput(device,
-				       "Action button height %.2f is invalid\n",
+				       "Action button height %.2f is invalid\nIt has to be greater than zero\n",
 				       button_height);
 		return;
 	}
@@ -1662,12 +1666,6 @@ tp_init_action_buttons(struct tp_dispatch *tp, struct evdev_device *device, cons
 	tp->corner_taps.top_area.bottom_edge = edges.y;
 	tp->corner_taps.top_area.rightbutton_left_edge = absx->maximum - edges.x + absx->minimum;
 	tp->corner_taps.top_area.leftbutton_right_edge = edges.x;
-
-	uint32_t left_key = KEY_PROG3;
-	uint32_t right_key = KEY_PROG4;
-
-	quirks_get_uint32(q, QUIRK_ATTR_LEFT_ACTION_BUTTON_CODE, &left_key);
-	quirks_get_uint32(q, QUIRK_ATTR_RIGHT_ACTION_BUTTON_CODE, &right_key);
 
 	tp->corner_taps.top_area.left_key = left_key;
 	tp->corner_taps.top_area.right_key = right_key;
@@ -1709,11 +1707,9 @@ tp_init_tap(struct tp_dispatch *tp)
 	assert(absx && absy);
 
 	double margin = 5.0;
-
-	_unref_(quirks) *q = libinput_device_get_quirks(&device->base);
-	if (q) {
-		quirks_get_double(q, QUIRK_ATTR_EDGE_MARGIN, &margin);
-	}
+	quirks_get_double(libinput_device_get_quirks(&device->base),
+					  QUIRK_ATTR_EDGE_MARGIN,
+					  &margin);
 
 	struct phys_coords mm = { margin, margin };
 
