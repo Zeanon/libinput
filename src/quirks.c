@@ -1432,6 +1432,7 @@ struct quirks_context *
 quirks_context_unref(struct quirks_context *ctx)
 {
 	struct section *s;
+	struct quirks *q;
 
 	if (!ctx)
 		return NULL;
@@ -1443,6 +1444,11 @@ quirks_context_unref(struct quirks_context *ctx)
 		return NULL;
 
 	/* Caller needs to clean up before calling this */
+	/* since KWIN does not seem to clean up all quirks properly, we do it */
+	list_for_each_safe(q, &ctx->quirks, link) {
+		quirks_unref(q);
+	}
+
 	assert(list_empty(&ctx->quirks));
 
 	list_for_each_safe(s, &ctx->sections, link) {

@@ -1039,6 +1039,13 @@ tools_list_device_quirks(struct quirks_context *ctx,
 			case QUIRK_ATTR_MIDDLE_BUTTON_WIDTH:
 			case QUIRK_ATTR_ACTION_BUTTON_WIDTH:
 			case QUIRK_ATTR_ACTION_BUTTON_HEIGHT:
+			case QUIRK_ATTR_EDGE_SCROLL_MARGIN:
+			case QUIRK_ATTR_EDGE_SCROLL_VERTICAL_MARGIN:
+			case QUIRK_ATTR_EDGE_SCROLL_HORIZONTAL_MARGIN:
+			case QUIRK_ATTR_EDGE_SCROLL_RIGHT_MARGIN:
+			case QUIRK_ATTR_EDGE_SCROLL_BOTTOM_MARGIN:
+			case QUIRK_ATTR_EDGE_SCROLL_LEFT_MARGIN:
+			case QUIRK_ATTR_EDGE_SCROLL_TOP_MARGIN:
 				quirks_get_double(quirks, q, &d);
 				snprintf(buf, sizeof(buf), "%s=%0.2f", name, d);
 				callback(userdata, buf);
