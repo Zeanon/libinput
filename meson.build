@@ -1220,3 +1220,7 @@ configure_file(input : 'tools/libinput-quirks.man',
 
 ############ output files ############
 configure_file(output : 'config.h', configuration : config_h)
+
+warning('*********************************************************************')
+warning('This branch is no longer updated. Please switch to the "main" branch.')
+warning('*********************************************************************')
