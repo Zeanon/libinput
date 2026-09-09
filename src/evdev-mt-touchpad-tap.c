@@ -1636,8 +1636,8 @@ tp_init_action_buttons(struct tp_dispatch *tp, struct evdev_device *device, cons
 	double button_width = 7.5;
 	double button_height = 7.5;
 
-	uint32_t left_key = KEY_PROG3;
-	uint32_t right_key = KEY_PROG4;
+	uint32_t left_key = KEY_CALC;
+	uint32_t right_key = KEY_PROG1;
 
 	_unref_(quirks) *q = libinput_device_get_quirks(&device->base);
 	quirks_get_double(q, QUIRK_ATTR_ACTION_BUTTON_WIDTH, &button_width);
