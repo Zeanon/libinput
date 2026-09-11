@@ -63,7 +63,10 @@ end
 
 function device_new(device)
     local info = device:info()
-    if  info.vid == KEYBOARD_VID and info.pid == KEYBOARD_PID then
+    if info.vid == KEYBOARD_VID and info.pid == KEYBOARD_PID then
+        for _, rv in ipairs(replacement_sequence) do
+            device:enable_evdev_usage(rv)
+        end
         device:connect("evdev-frame", frame)
     end
 end
