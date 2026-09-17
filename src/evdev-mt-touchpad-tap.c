@@ -155,8 +155,6 @@ tp_corner_tap(struct tp_dispatch *tp,
 	*/
 	if (usec_cmp(DEFAULT_TAP_TIMEOUT_PERIOD, usec_delta(time, tp->tap.saved_double_tap_time)) > 0) {
 		uint32_t key;
-		keycode_t keycode;
-		struct libinput_device *device = &tp->device->base;
 
 		if (is_inside_top_left_corner(tp, t)) {
 			key = tp->corner_taps.top_area.left_key;
@@ -166,7 +164,8 @@ tp_corner_tap(struct tp_dispatch *tp,
 			return;
 		}
 
-		keycode = keycode_from_uint32_t(key);
+		keycode_t keycode = keycode_from_uint32_t(key);
+		struct libinput_device *device = &tp->device->base;
 
 		keyboard_notify_key(device,
 			time,
