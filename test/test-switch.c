@@ -119,6 +119,20 @@ START_TEST(switch_has_keypad_slide_switch)
 }
 END_TEST
 
+START_TEST(switch_has_camera_lens_cover_switch)
+{
+	struct litest_device *dev = litest_current_device();
+
+	if (!libevdev_has_event_code(dev->evdev, EV_SW, SW_CAMERA_LENS_COVER))
+		return LITEST_NOT_APPLICABLE;
+
+	litest_assert_int_eq(
+		libinput_device_switch_has_switch(dev->libinput_device,
+						  LIBINPUT_SWITCH_CAMERA_LENS_COVER),
+		1);
+}
+END_TEST
+
 START_TEST(switch_toggle)
 {
 	struct litest_device *dev = litest_current_device();
@@ -1119,6 +1133,66 @@ START_TEST(tablet_mode_disable_keyboard)
 }
 END_TEST
 
+START_TEST(tablet_mode_dwt_key_release)
+{
+	struct litest_device *sw = litest_current_device();
+	struct libinput *li = sw->libinput;
+	unsigned int key = litest_test_param_get_i32(test_env->params, "key");
+
+	if (!switch_has_tablet_mode(sw))
+		return LITEST_NOT_APPLICABLE;
+
+	struct litest_device *keyboard = litest_add_device(li, LITEST_KEYBOARD);
+	struct litest_device *touchpad = litest_add_device(li, LITEST_SYNAPTICS_I2C);
+	struct libinput_device *tp = touchpad->libinput_device;
+
+	litest_assert_enum_eq(
+		libinput_device_config_dwt_set_enabled(tp, LIBINPUT_CONFIG_DWT_ENABLED),
+		LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_disable_hold_gestures(tp);
+	litest_drain_events(li);
+
+	litest_keyboard_key(keyboard, key, true);
+	litest_assert_key_event(li, key, LIBINPUT_KEY_STATE_PRESSED);
+
+	litest_switch_action(sw, LIBINPUT_SWITCH_TABLET_MODE, LIBINPUT_SWITCH_STATE_ON);
+	litest_assert_key_event(li, key, LIBINPUT_KEY_STATE_RELEASED);
+	litest_assert_switch_event(li,
+				   LIBINPUT_SWITCH_TABLET_MODE,
+				   LIBINPUT_SWITCH_STATE_ON);
+
+	/* The physical release happens while the keyboard is suspended. */
+	litest_keyboard_key(keyboard, key, false);
+	litest_assert_empty_queue(li);
+	litest_switch_action(sw,
+			     LIBINPUT_SWITCH_TABLET_MODE,
+			     LIBINPUT_SWITCH_STATE_OFF);
+	litest_assert_switch_event(li,
+				   LIBINPUT_SWITCH_TABLET_MODE,
+				   LIBINPUT_SWITCH_STATE_OFF);
+
+	/* A stale modifier must not prevent DWT from activating. */
+	litest_keyboard_key(keyboard, KEY_B, true);
+	litest_assert_key_event(li, KEY_B, LIBINPUT_KEY_STATE_PRESSED);
+	litest_touch_down(touchpad, 0, 50, 50);
+	litest_touch_move_to(touchpad, 0, 50, 50, 70, 50, 10);
+	litest_touch_up(touchpad, 0);
+	litest_assert_empty_queue(li);
+
+	/* A stale typing key must not keep DWT active after this release. */
+	litest_keyboard_key(keyboard, KEY_B, false);
+	litest_assert_key_event(li, KEY_B, LIBINPUT_KEY_STATE_RELEASED);
+	litest_timeout_dwt_long(li);
+	litest_touch_down(touchpad, 0, 50, 50);
+	litest_touch_move_to(touchpad, 0, 50, 50, 70, 50, 10);
+	litest_touch_up(touchpad, 0);
+	litest_assert_only_typed_events(li, LIBINPUT_EVENT_POINTER_MOTION);
+
+	litest_device_destroy(keyboard);
+	litest_device_destroy(touchpad);
+}
+END_TEST
+
 START_TEST(tablet_mode_disable_keyboard_on_init)
 {
 	struct litest_device *sw = litest_current_device();
@@ -1370,11 +1444,13 @@ TEST_COLLECTION(switch)
 	litest_add(switch_has_lid_switch, LITEST_SWITCH, LITEST_ANY);
 	litest_add(switch_has_tablet_mode_switch, LITEST_SWITCH, LITEST_ANY);
 	litest_add(switch_has_keypad_slide_switch, LITEST_SWITCH, LITEST_ANY);
+	litest_add(switch_has_camera_lens_cover_switch, LITEST_SWITCH, LITEST_ANY);
 	litest_add(switch_not_down_on_init, LITEST_SWITCH, LITEST_ANY);
 
-	litest_with_parameters(params, "switch", 'I', 3, litest_named_i32(LIBINPUT_SWITCH_LID, "lid"),
+	litest_with_parameters(params, "switch", 'I', 4, litest_named_i32(LIBINPUT_SWITCH_LID, "lid"),
 							 litest_named_i32(LIBINPUT_SWITCH_TABLET_MODE, "tablet_mode"),
-							 litest_named_i32(LIBINPUT_SWITCH_KEYPAD_SLIDE, "keypad_slide")) {
+							 litest_named_i32(LIBINPUT_SWITCH_KEYPAD_SLIDE, "keypad_slide"),
+							 litest_named_i32(LIBINPUT_SWITCH_CAMERA_LENS_COVER, "camera_lens_cover")) {
 		litest_add_parametrized(switch_toggle, LITEST_SWITCH, LITEST_ANY, params);
 		litest_add_parametrized(switch_toggle_double, LITEST_SWITCH, LITEST_ANY, params);
 		litest_add_parametrized(switch_down_on_init, LITEST_SWITCH, LITEST_ANY, params);
@@ -1406,6 +1482,10 @@ TEST_COLLECTION(switch)
 	litest_add(tablet_mode_disable_touchpad_on_resume, LITEST_SWITCH, LITEST_ANY);
 	litest_add(tablet_mode_enable_touchpad_on_resume, LITEST_SWITCH, LITEST_ANY);
 	litest_add(tablet_mode_disable_keyboard, LITEST_SWITCH, LITEST_ANY);
+	litest_with_parameters(params, "key", 'I', 2, litest_named_i32(KEY_A, "typing"),
+						  litest_named_i32(KEY_LEFTCTRL, "modifier")) {
+		litest_add_parametrized(tablet_mode_dwt_key_release, LITEST_SWITCH, LITEST_ANY, params);
+	}
 	litest_add(tablet_mode_disable_keyboard_on_init, LITEST_SWITCH, LITEST_ANY);
 	litest_add(tablet_mode_disable_keyboard_on_resume, LITEST_SWITCH, LITEST_ANY);
 	litest_add(tablet_mode_enable_keyboard_on_resume, LITEST_SWITCH, LITEST_ANY);

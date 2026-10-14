@@ -2064,6 +2064,11 @@ evdev_configure_device(struct evdev_device *device,
 			device->tags |= EVDEV_TAG_KEYPAD_SLIDE_SWITCH;
 		}
 
+		if (libevdev_has_event_code(evdev, EV_SW, SW_CAMERA_LENS_COVER)) {
+			device->seat_caps |= EVDEV_DEVICE_SWITCH;
+			device->tags |= EVDEV_TAG_CAMERA_LENS_COVER_SWITCH;
+		}
+
 		if (device->seat_caps & EVDEV_DEVICE_SWITCH)
 			evdev_log_info(device, "device is a switch device\n");
 	}
@@ -2772,6 +2777,9 @@ evdev_device_has_switch(struct evdev_device *device, enum libinput_switch sw)
 	case LIBINPUT_SWITCH_KEYPAD_SLIDE:
 		code = SW_KEYPAD_SLIDE;
 		break;
+	case LIBINPUT_SWITCH_CAMERA_LENS_COVER:
+		code = SW_CAMERA_LENS_COVER;
+		break;
 	default:
 		return -1;
 	}
@@ -2951,10 +2959,12 @@ evdev_device_suspend(struct evdev_device *device)
 {
 	struct libinput *libinput = evdev_libinput_context(device);
 
-	evdev_notify_suspended_device(device);
-
 	if (device->dispatch->interface->suspend)
 		device->dispatch->interface->suspend(device->dispatch, device);
+
+	/* Paired devices must receive the neutral-state events before their
+	 * suspension callbacks remove the event listeners. */
+	evdev_notify_suspended_device(device);
 
 	if (device->source) {
 		libinput_remove_source(libinput, device->source);

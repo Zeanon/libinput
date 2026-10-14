@@ -512,7 +512,9 @@ pkgconfig.generate(
 	]
 )
 
-git_version_h = vcs_tag(command : ['git', 'describe'],
+# only describe libinput's own repository, not one it is unpacked inside
+git_dir = '--git-dir=' + (meson.project_source_root() / '.git')
+git_version_h = vcs_tag(command : ['git', git_dir, 'describe'],
 			fallback : 'unknown',
 			input : 'src/libinput-git-version.h.in',
 			output :'libinput-git-version.h')
@@ -885,6 +887,7 @@ if get_option('tests')
 		'test/litest-device-atmel-hover.c',
 		'test/litest-device-bcm5974.c',
 		'test/litest-device-calibrated-touchscreen.c',
+		'test/litest-device-camera-lens-cover-switch.c',
 		'test/litest-device-cyborg-rat-5.c',
 		'test/litest-device-dell-canvas-totem.c',
 		'test/litest-device-dell-canvas-totem-touch.c',
