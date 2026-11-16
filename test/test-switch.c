@@ -1146,9 +1146,9 @@ START_TEST(tablet_mode_dwt_key_release)
 	struct litest_device *touchpad = litest_add_device(li, LITEST_SYNAPTICS_I2C);
 	struct libinput_device *tp = touchpad->libinput_device;
 
-	litest_assert_enum_eq(
-		libinput_device_config_dwt_set_enabled(tp, LIBINPUT_CONFIG_DWT_ENABLED),
-		LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_dwt_set_enabled(tp,
+						       LIBINPUT_CONFIG_DWT_ENABLED));
 	litest_disable_hold_gestures(tp);
 	litest_drain_events(li);
 

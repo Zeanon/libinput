@@ -509,7 +509,6 @@ START_TEST(touch_calibration_config)
 	float identity[6] = { 1, 0, 0, 0, 1, 0 };
 	float nonidentity[6] = { 1, 2, 3, 4, 5, 6 };
 	float matrix[6];
-	enum libinput_config_status status;
 	int rc;
 
 	rc = libinput_device_config_calibration_has_matrix(dev->libinput_device);
@@ -517,18 +516,16 @@ START_TEST(touch_calibration_config)
 
 	/* Twice so we have every to-fro combination */
 	for (int i = 0; i < 2; i++) {
-		status = libinput_device_config_calibration_set_matrix(
+		litest_assert_config(libinput_device_config_calibration_set_matrix(
 			dev->libinput_device,
-			identity);
-		litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+			identity));
 		libinput_device_config_calibration_get_matrix(dev->libinput_device,
 							      matrix);
 		litest_assert_int_eq(memcmp(matrix, identity, sizeof(matrix)), 0);
 
-		status = libinput_device_config_calibration_set_matrix(
+		litest_assert_config(libinput_device_config_calibration_set_matrix(
 			dev->libinput_device,
-			nonidentity);
-		litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+			nonidentity));
 		libinput_device_config_calibration_get_matrix(dev->libinput_device,
 							      matrix);
 		litest_assert_int_eq(memcmp(matrix, nonidentity, sizeof(matrix)), 0);

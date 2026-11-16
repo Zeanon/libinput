@@ -3750,14 +3750,12 @@ START_TEST(touchpad_tap_set_map)
 	enum libinput_config_status status;
 
 	map = LIBINPUT_CONFIG_TAP_MAP_LRM;
-	status = libinput_device_config_tap_set_button_map(device, map);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_tap_set_button_map(device, map));
 	map = libinput_device_config_tap_get_button_map(dev->libinput_device);
 	litest_assert_enum_eq(map, LIBINPUT_CONFIG_TAP_MAP_LRM);
 
 	map = LIBINPUT_CONFIG_TAP_MAP_LMR;
-	status = libinput_device_config_tap_set_button_map(device, map);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_tap_set_button_map(device, map));
 	map = libinput_device_config_tap_get_button_map(dev->libinput_device);
 	litest_assert_enum_eq(map, LIBINPUT_CONFIG_TAP_MAP_LMR);
 
@@ -3900,10 +3898,9 @@ START_TEST(touchpad_drag_config_unsupported)
 		dev->libinput_device,
 		LIBINPUT_CONFIG_DRAG_ENABLED);
 	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_UNSUPPORTED);
-	status = libinput_device_config_tap_set_drag_enabled(
+	litest_assert_config(libinput_device_config_tap_set_drag_enabled(
 		dev->libinput_device,
-		LIBINPUT_CONFIG_DRAG_DISABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_DRAG_DISABLED));
 }
 END_TEST
 
@@ -4179,32 +4176,28 @@ START_TEST(touchpad_drag_lock_default_disabled)
 		libinput_device_config_tap_get_default_drag_lock_enabled(device),
 		LIBINPUT_CONFIG_DRAG_LOCK_DISABLED);
 
-	status = libinput_device_config_tap_set_drag_lock_enabled(
+	litest_assert_config(libinput_device_config_tap_set_drag_lock_enabled(
 		device,
-		LIBINPUT_CONFIG_DRAG_LOCK_ENABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_DRAG_LOCK_ENABLED));
 	/* ENABLED is a legacy spelling for ENABLED_TIMEOUT */
 	litest_assert_enum_eq(libinput_device_config_tap_get_drag_lock_enabled(device),
 			      LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_TIMEOUT);
 
-	status = libinput_device_config_tap_set_drag_lock_enabled(
+	litest_assert_config(libinput_device_config_tap_set_drag_lock_enabled(
 		device,
-		LIBINPUT_CONFIG_DRAG_LOCK_DISABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_DRAG_LOCK_DISABLED));
 	litest_assert_enum_eq(libinput_device_config_tap_get_drag_lock_enabled(device),
 			      LIBINPUT_CONFIG_DRAG_LOCK_DISABLED);
 
-	status = libinput_device_config_tap_set_drag_lock_enabled(
+	litest_assert_config(libinput_device_config_tap_set_drag_lock_enabled(
 		device,
-		LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_TIMEOUT);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_TIMEOUT));
 	litest_assert_enum_eq(libinput_device_config_tap_get_drag_lock_enabled(device),
 			      LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_TIMEOUT);
 
-	status = libinput_device_config_tap_set_drag_lock_enabled(
+	litest_assert_config(libinput_device_config_tap_set_drag_lock_enabled(
 		device,
-		LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_STICKY);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_STICKY));
 	litest_assert_enum_eq(libinput_device_config_tap_get_drag_lock_enabled(device),
 			      LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_STICKY);
 
@@ -4240,10 +4233,9 @@ START_TEST(touchpad_drag_lock_default_unavailable)
 		LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_STICKY);
 	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_UNSUPPORTED);
 
-	status = libinput_device_config_tap_set_drag_lock_enabled(
+	litest_assert_config(libinput_device_config_tap_set_drag_lock_enabled(
 		device,
-		LIBINPUT_CONFIG_DRAG_LOCK_DISABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_DRAG_LOCK_DISABLED));
 
 	status = libinput_device_config_tap_set_drag_lock_enabled(device, 3);
 	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_INVALID);

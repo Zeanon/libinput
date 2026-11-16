@@ -1459,6 +1459,11 @@ litest_semi_mt_touch_up(struct litest_device *d,
 			struct litest_semi_mt *semi_mt,
 			unsigned int slot);
 
+#define litest_assert_config(_call) do { \
+	enum libinput_config_status status = _call; \
+	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS); \
+} while(0)
+
 static inline void
 litest_enable_3fg_drag(struct libinput_device *device, unsigned int nfingers)
 {
@@ -1476,70 +1481,47 @@ litest_enable_3fg_drag(struct libinput_device *device, unsigned int nfingers)
 		break;
 	}
 
-	enum libinput_config_status status =
-		libinput_device_config_3fg_drag_set_enabled(device, enabled);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_3fg_drag_set_enabled(device, enabled));
 }
 
 static inline void
 litest_enable_tap(struct libinput_device *device)
 {
-	enum libinput_config_status status, expected;
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_tap_set_enabled(device,
-							LIBINPUT_CONFIG_TAP_ENABLED);
-
-	litest_assert_int_eq(status, expected);
+	litest_assert_config(
+		libinput_device_config_tap_set_enabled(device,
+						       LIBINPUT_CONFIG_TAP_ENABLED));
 }
 
 static inline void
 litest_disable_tap(struct libinput_device *device)
 {
-	enum libinput_config_status status, expected;
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_tap_set_enabled(device,
-							LIBINPUT_CONFIG_TAP_DISABLED);
-
-	litest_assert_int_eq(status, expected);
+	litest_assert_config(
+		libinput_device_config_tap_set_enabled(device,
+						       LIBINPUT_CONFIG_TAP_DISABLED));
 }
 
 static inline void
 litest_set_tap_map(struct libinput_device *device,
 		   enum libinput_config_tap_button_map map)
 {
-	enum libinput_config_status status, expected;
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_tap_set_button_map(device, map);
-	litest_assert_int_eq(status, expected);
+	litest_assert_config(libinput_device_config_tap_set_button_map(device, map));
 }
 
 static inline void
 litest_enable_tap_drag(struct libinput_device *device)
 {
-	enum libinput_config_status status, expected;
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_tap_set_drag_enabled(
+	litest_assert_config(libinput_device_config_tap_set_drag_enabled(
 		device,
-		LIBINPUT_CONFIG_DRAG_ENABLED);
-
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_DRAG_ENABLED));
 }
 
 static inline void
 litest_disable_tap_drag(struct libinput_device *device)
 {
-	enum libinput_config_status status, expected;
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_tap_set_drag_enabled(
+	litest_assert_config(libinput_device_config_tap_set_drag_enabled(
 		device,
-		LIBINPUT_CONFIG_DRAG_DISABLED);
-
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_DRAG_DISABLED));
 }
 
 static inline bool
@@ -1554,14 +1536,11 @@ litest_has_2fg_scroll(struct litest_device *dev)
 static inline void
 litest_enable_2fg_scroll(struct litest_device *dev)
 {
-	enum libinput_config_status status, expected;
 	struct libinput_device *device = dev->libinput_device;
 
-	status = libinput_device_config_scroll_set_method(device,
-							  LIBINPUT_CONFIG_SCROLL_2FG);
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	litest_assert_int_eq(status, expected);
+	litest_assert_config(
+		libinput_device_config_scroll_set_method(device,
+							 LIBINPUT_CONFIG_SCROLL_2FG));
 
 	libinput_device_config_scroll_set_natural_scroll_enabled(device, 0);
 }
@@ -1569,14 +1548,11 @@ litest_enable_2fg_scroll(struct litest_device *dev)
 static inline void
 litest_enable_edge_scroll(struct litest_device *dev)
 {
-	enum libinput_config_status status, expected;
 	struct libinput_device *device = dev->libinput_device;
 
-	status = libinput_device_config_scroll_set_method(device,
-							  LIBINPUT_CONFIG_SCROLL_EDGE);
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	litest_assert_int_eq(status, expected);
+	litest_assert_config(
+		libinput_device_config_scroll_set_method(device,
+							 LIBINPUT_CONFIG_SCROLL_EDGE));
 
 	libinput_device_config_scroll_set_natural_scroll_enabled(device, 0);
 }
@@ -1584,15 +1560,11 @@ litest_enable_edge_scroll(struct litest_device *dev)
 static inline void
 litest_enable_circular_scroll(struct litest_device *dev)
 {
-	enum libinput_config_status status, expected;
 	struct libinput_device *device = dev->libinput_device;
 
-	status = libinput_device_config_scroll_set_method(
+	litest_assert_config(libinput_device_config_scroll_set_method(
 		device,
-		LIBINPUT_CONFIG_SCROLL_CIRCULAR);
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_SCROLL_CIRCULAR));
 
 	libinput_device_config_scroll_set_natural_scroll_enabled(device, 0);
 }
@@ -1618,171 +1590,121 @@ litest_has_btnareas(struct litest_device *dev)
 static inline void
 litest_enable_clickfinger(struct litest_device *dev)
 {
-	enum libinput_config_status status, expected;
 	struct libinput_device *device = dev->libinput_device;
 
-	status = libinput_device_config_click_set_method(
+	litest_assert_config(libinput_device_config_click_set_method(
 		device,
-		LIBINPUT_CONFIG_CLICK_METHOD_CLICKFINGER);
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_CLICK_METHOD_CLICKFINGER));
 }
 
 static inline void
 litest_set_clickfinger_map(struct litest_device *dev,
 			   enum libinput_config_clickfinger_button_map map)
 {
-	enum libinput_config_status status, expected;
 	struct libinput_device *device = dev->libinput_device;
 
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_click_set_clickfinger_button_map(device, map);
-	litest_assert_int_eq(status, expected);
+	litest_assert_config(
+		libinput_device_config_click_set_clickfinger_button_map(device, map));
 }
 
 static inline void
 litest_enable_buttonareas(struct litest_device *dev)
 {
-	enum libinput_config_status status, expected;
 	struct libinput_device *device = dev->libinput_device;
 
-	status = libinput_device_config_click_set_method(
+	litest_assert_config(libinput_device_config_click_set_method(
 		device,
-		LIBINPUT_CONFIG_CLICK_METHOD_BUTTON_AREAS);
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_CLICK_METHOD_BUTTON_AREAS));
 }
 
 static inline void
 litest_enable_drag_lock_sticky(struct libinput_device *device)
 {
-	enum libinput_config_status status, expected;
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_tap_set_drag_lock_enabled(
+	litest_assert_config(libinput_device_config_tap_set_drag_lock_enabled(
 		device,
-		LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_STICKY);
-
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_STICKY));
 }
 
 static inline void
 litest_enable_drag_lock(struct libinput_device *device)
 {
-	enum libinput_config_status status, expected;
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_tap_set_drag_lock_enabled(
+	litest_assert_config(libinput_device_config_tap_set_drag_lock_enabled(
 		device,
-		LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_TIMEOUT);
-
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_TIMEOUT));
 }
 
 static inline void
 litest_disable_drag_lock(struct libinput_device *device)
 {
-	enum libinput_config_status status, expected;
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_tap_set_drag_lock_enabled(
+	litest_assert_config(libinput_device_config_tap_set_drag_lock_enabled(
 		device,
-		LIBINPUT_CONFIG_DRAG_LOCK_DISABLED);
-
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_DRAG_LOCK_DISABLED));
 }
 
 static inline void
 litest_enable_middleemu(struct litest_device *dev)
 {
 	struct libinput_device *device = dev->libinput_device;
-	enum libinput_config_status status, expected;
 
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_middle_emulation_set_enabled(
+	litest_assert_config(libinput_device_config_middle_emulation_set_enabled(
 		device,
-		LIBINPUT_CONFIG_MIDDLE_EMULATION_ENABLED);
-
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_MIDDLE_EMULATION_ENABLED));
 }
 
 static inline void
 litest_disable_middleemu(struct litest_device *dev)
 {
 	struct libinput_device *device = dev->libinput_device;
-	enum libinput_config_status status, expected;
 
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_middle_emulation_set_enabled(
+	litest_assert_config(libinput_device_config_middle_emulation_set_enabled(
 		device,
-		LIBINPUT_CONFIG_MIDDLE_EMULATION_DISABLED);
-
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_MIDDLE_EMULATION_DISABLED));
 }
 
 static inline void
 litest_sendevents_off(struct litest_device *dev)
 {
 	struct libinput_device *device = dev->libinput_device;
-	enum libinput_config_status status, expected;
 
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_send_events_set_mode(
+	litest_assert_config(libinput_device_config_send_events_set_mode(
 		device,
-		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED);
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED));
 }
 
 static inline void
 litest_sendevents_on(struct litest_device *dev)
 {
 	struct libinput_device *device = dev->libinput_device;
-	enum libinput_config_status status, expected;
 
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_send_events_set_mode(
+	litest_assert_config(libinput_device_config_send_events_set_mode(
 		device,
-		LIBINPUT_CONFIG_SEND_EVENTS_ENABLED);
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_SEND_EVENTS_ENABLED));
 }
 
 static inline void
 litest_sendevents_ext_mouse(struct litest_device *dev)
 {
 	struct libinput_device *device = dev->libinput_device;
-	enum libinput_config_status status, expected;
 
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_send_events_set_mode(
+	litest_assert_config(libinput_device_config_send_events_set_mode(
 		device,
-		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED_ON_EXTERNAL_MOUSE);
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED_ON_EXTERNAL_MOUSE));
 }
 
 static inline void
 litest_enable_hold_gestures(struct libinput_device *device)
 {
-	enum libinput_config_status status, expected;
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_gesture_set_hold_enabled(
+	litest_assert_config(libinput_device_config_gesture_set_hold_enabled(
 		device,
-		LIBINPUT_CONFIG_HOLD_ENABLED);
-
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_HOLD_ENABLED));
 }
 
 static inline void
 litest_disable_hold_gestures(struct libinput_device *device)
 {
-	enum libinput_config_status status, expected;
-
-	expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_gesture_set_hold_enabled(
+	litest_assert_config(libinput_device_config_gesture_set_hold_enabled(
 		device,
-		LIBINPUT_CONFIG_HOLD_DISABLED);
-
-	litest_assert_int_eq(status, expected);
+		LIBINPUT_CONFIG_HOLD_DISABLED));
 }
 
 static inline bool

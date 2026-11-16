@@ -706,21 +706,19 @@ START_TEST(pad_left_handed_default)
 #ifdef HAVE_LIBWACOM
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *device = dev->libinput_device;
-	enum libinput_config_status status;
-
 	litest_assert(libinput_device_config_left_handed_is_available(device));
 
 	litest_assert_int_eq(libinput_device_config_left_handed_get_default(device), 0);
 	litest_assert_int_eq(libinput_device_config_left_handed_get(device), 0);
 
-	status = libinput_device_config_left_handed_set(dev->libinput_device, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_left_handed_set(dev->libinput_device, 1));
 
 	litest_assert_int_eq(libinput_device_config_left_handed_get(device), 1);
 	litest_assert_int_eq(libinput_device_config_left_handed_get_default(device), 0);
 
-	status = libinput_device_config_left_handed_set(dev->libinput_device, 0);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_left_handed_set(dev->libinput_device, 0));
 
 	litest_assert_int_eq(libinput_device_config_left_handed_get(device), 0);
 	litest_assert_int_eq(libinput_device_config_left_handed_get_default(device), 0);
@@ -1165,14 +1163,11 @@ START_TEST(pad_send_events_disabled)
 {
 	struct litest_device *dev = litest_current_device();
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
-
 	litest_drain_events(li);
 
-	status = libinput_device_config_send_events_set_mode(
+	litest_assert_config(libinput_device_config_send_events_set_mode(
 		dev->libinput_device,
-		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED));
 
 	litest_pad_strip_start(dev, 10);
 	litest_assert_empty_queue(li);

@@ -76,8 +76,7 @@ START_TEST(trackball_rotation_config_no_rotation)
 	litest_assert_int_eq(angle, 0);
 
 	/* 0 always succeeds */
-	status = libinput_device_config_rotation_set_angle(device, 0);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_rotation_set_angle(device, 0));
 
 	for (angle = 1; angle < 360; angle++) {
 		status = libinput_device_config_rotation_set_angle(device, angle);
@@ -90,14 +89,13 @@ START_TEST(trackball_rotation_config_right_angle)
 {
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *device = dev->libinput_device;
-	enum libinput_config_status status;
 	int angle;
 
 	litest_assert(libinput_device_config_rotation_is_available(device));
 
 	for (angle = 0; angle < 360; angle += 90) {
-		status = libinput_device_config_rotation_set_angle(device, angle);
-		litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		litest_assert_config(
+			libinput_device_config_rotation_set_angle(device, angle));
 	}
 }
 END_TEST
@@ -106,14 +104,13 @@ START_TEST(trackball_rotation_config_odd_angle)
 {
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *device = dev->libinput_device;
-	enum libinput_config_status status;
 	int angle;
 
 	litest_assert(libinput_device_config_rotation_is_available(device));
 
 	for (angle = 0; angle < 360; angle++) {
-		status = libinput_device_config_rotation_set_angle(device, angle);
-		litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		litest_assert_config(
+			libinput_device_config_rotation_set_angle(device, angle));
 	}
 }
 END_TEST

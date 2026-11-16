@@ -1994,15 +1994,14 @@ START_TEST(left_handed_tilt)
 	struct libinput *li = dev->libinput;
 	struct libinput_event *event;
 	struct libinput_event_tablet_tool *tev;
-	enum libinput_config_status status;
 	struct axis_replacement axes[] = {
 		{ ABS_DISTANCE, 10 }, { ABS_PRESSURE, 0 }, { ABS_TILT_X, 90 },
 		{ ABS_TILT_Y, 10 },   { -1, -1 },
 	};
 	double tx, ty;
 
-	status = libinput_device_config_left_handed_set(dev->libinput_device, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_left_handed_set(dev->libinput_device, 1));
 
 	litest_drain_events(li);
 
@@ -2065,7 +2064,6 @@ START_TEST(left_handed_mouse_rotation)
 #ifdef HAVE_LIBWACOM
 	struct litest_device *dev = litest_current_device();
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
 	int angle;
 	double val, old_val = 0;
 	struct axis_replacement axes[] = {
@@ -2073,8 +2071,8 @@ START_TEST(left_handed_mouse_rotation)
 		{ ABS_TILT_Y, 0 },    { -1, -1 },
 	};
 
-	status = libinput_device_config_left_handed_set(dev->libinput_device, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_left_handed_set(dev->libinput_device, 1));
 
 	litest_drain_events(li);
 
@@ -2114,7 +2112,6 @@ START_TEST(left_handed_artpen_rotation)
 	struct libinput_event *event;
 	struct libinput_event_tablet_tool *tev;
 	const struct input_absinfo *abs;
-	enum libinput_config_status status;
 	double val;
 	double scale;
 	int angle;
@@ -2122,8 +2119,8 @@ START_TEST(left_handed_artpen_rotation)
 	if (!libevdev_has_event_code(dev->evdev, EV_ABS, ABS_Z))
 		return LITEST_NOT_APPLICABLE;
 
-	status = libinput_device_config_left_handed_set(dev->libinput_device, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_left_handed_set(dev->libinput_device, 1));
 
 	litest_drain_events(li);
 
@@ -3750,7 +3747,6 @@ START_TEST(tablet_calibration_set_matrix_delta)
 	struct litest_device *dev = litest_current_device();
 	struct libinput *li = dev->libinput;
 	struct libinput_device *d = dev->libinput_device;
-	enum libinput_config_status status;
 	float calibration[6] = { 0.5, 0, 0, 0, 0.5, 0 };
 	struct libinput_event *event;
 	struct libinput_event_tablet_tool *tablet_event;
@@ -3795,8 +3791,8 @@ START_TEST(tablet_calibration_set_matrix_delta)
 	litest_wait_for_event_of_type(li, LIBINPUT_EVENT_TABLET_TOOL_PROXIMITY);
 	litest_drain_events(li);
 
-	status = libinput_device_config_calibration_set_matrix(d, calibration);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_calibration_set_matrix(d, calibration));
 
 	litest_tablet_proximity_in(dev, 100, 100, axes);
 	litest_tablet_tip_down(dev, 100, 100, axes);
@@ -3835,7 +3831,6 @@ START_TEST(tablet_calibration_set_matrix)
 	struct litest_device *dev = litest_current_device();
 	struct libinput *li = dev->libinput;
 	struct libinput_device *d = dev->libinput_device;
-	enum libinput_config_status status;
 	float calibration[6] = { 0.5, 0, 0, 0, 1, 0 };
 	struct libinput_event *event;
 	struct libinput_event_tablet_tool *tablet_event;
@@ -3851,8 +3846,8 @@ START_TEST(tablet_calibration_set_matrix)
 
 	litest_drain_events(li);
 
-	status = libinput_device_config_calibration_set_matrix(d, calibration);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_calibration_set_matrix(d, calibration));
 
 	litest_tablet_proximity_in(dev, 100, 100, axes);
 	litest_dispatch(li);
@@ -3880,8 +3875,8 @@ START_TEST(tablet_calibration_set_matrix)
 
 	calibration[0] = 1;
 	calibration[4] = 0.5;
-	status = libinput_device_config_calibration_set_matrix(d, calibration);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_calibration_set_matrix(d, calibration));
 
 	litest_tablet_proximity_in(dev, 100, 100, axes);
 	litest_dispatch(li);
@@ -4065,9 +4060,7 @@ START_TEST(tablet_area_set_rectangle)
 		unscaled = &x;
 	}
 
-	enum libinput_config_status status =
-		libinput_device_config_area_set_rectangle(d, &rect);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_area_set_rectangle(d, &rect));
 
 	litest_drain_events(li);
 
@@ -4135,9 +4128,7 @@ START_TEST(tablet_area_set_rectangle_move_outside)
 		0.75,
 	};
 
-	enum libinput_config_status status =
-		libinput_device_config_area_set_rectangle(d, &rect);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_area_set_rectangle(d, &rect));
 
 	litest_drain_events(li);
 
@@ -4211,9 +4202,7 @@ START_TEST(tablet_area_set_rectangle_move_outside_to_inside)
 		0.75,
 	};
 
-	enum libinput_config_status status =
-		libinput_device_config_area_set_rectangle(d, &rect);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_area_set_rectangle(d, &rect));
 
 	litest_drain_events(li);
 
@@ -4282,9 +4271,7 @@ START_TEST(tablet_area_set_rectangle_move_in_margin)
 		0.75,
 	};
 
-	enum libinput_config_status status =
-		libinput_device_config_area_set_rectangle(d, &rect);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_area_set_rectangle(d, &rect));
 
 	litest_drain_events(li);
 
@@ -4335,9 +4322,7 @@ START_TEST(tablet_area_set_rectangle_while_outside)
 		0.75,
 	};
 
-	enum libinput_config_status status =
-		libinput_device_config_area_set_rectangle(d, &rect);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_area_set_rectangle(d, &rect));
 
 	litest_drain_events(li);
 
@@ -4356,8 +4341,7 @@ START_TEST(tablet_area_set_rectangle_while_outside)
 		0.95,
 	};
 
-	status = libinput_device_config_area_set_rectangle(d, &rect);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_area_set_rectangle(d, &rect));
 
 	litest_checkpoint("Proximity in + out inside tablet area");
 	litest_tablet_proximity_in(dev, 11, 11, axes);
@@ -4800,9 +4784,8 @@ START_TEST(tablet_pressure_config_set_minimum)
 	old_pressure = p;
 
 	litest_assert(libinput_tablet_tool_config_pressure_range_is_available(tool));
-	litest_assert_enum_eq(
-		libinput_tablet_tool_config_pressure_range_set(tool, 0.4, 1.0),
-		LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_tablet_tool_config_pressure_range_set(tool, 0.4, 1.0));
 	libinput_event_destroy(event);
 
 	/* config doesn't take effect until we're out of prox */
@@ -4892,9 +4875,8 @@ START_TEST(tablet_pressure_config_set_maximum)
 	old_pressure = p;
 
 	litest_assert(libinput_tablet_tool_config_pressure_range_is_available(tool));
-	litest_assert_enum_eq(
-		libinput_tablet_tool_config_pressure_range_set(tool, 0.0, 0.6),
-		LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_tablet_tool_config_pressure_range_set(tool, 0.0, 0.6));
 	libinput_event_destroy(event);
 
 	/* config doesn't take effect until we're out of prox */
@@ -4993,9 +4975,8 @@ START_TEST(tablet_pressure_config_set_range)
 	old_pressure = p;
 
 	litest_assert(libinput_tablet_tool_config_pressure_range_is_available(tool));
-	litest_assert_enum_eq(
-		libinput_tablet_tool_config_pressure_range_set(tool, 0.4, 0.6),
-		LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_tablet_tool_config_pressure_range_set(tool, 0.4, 0.6));
 	libinput_event_destroy(event);
 
 	/* config doesn't take effect until we're out of prox */
@@ -5069,11 +5050,10 @@ START_TEST(tablet_pressure_config_resets_offset)
 
 		litest_assert(
 			libinput_tablet_tool_config_pressure_range_is_available(tool));
-		litest_assert_enum_eq(
+		litest_assert_config(
 			libinput_tablet_tool_config_pressure_range_set(tool,
 								       0.01,
-								       0.99),
-			LIBINPUT_CONFIG_STATUS_SUCCESS);
+								       0.99));
 	}
 
 	litest_tablet_proximity_out(dev);
@@ -5151,9 +5131,8 @@ START_TEST(tablet_pressure_config_01_does_not_reset_offset)
 
 		litest_assert(
 			libinput_tablet_tool_config_pressure_range_is_available(tool));
-		litest_assert_enum_eq(
-			libinput_tablet_tool_config_pressure_range_set(tool, 0.0, 1.0),
-			LIBINPUT_CONFIG_STATUS_SUCCESS);
+		litest_assert_config(
+			libinput_tablet_tool_config_pressure_range_set(tool, 0.0, 1.0));
 	}
 
 	/* Drain potential tip event. */
@@ -6114,14 +6093,12 @@ START_TEST(relative_calibration)
 	};
 	double dx, dy;
 	float calibration[] = { -1, 0, 1, 0, -1, 1 };
-	enum libinput_config_status status;
-
 	if (!libinput_device_config_calibration_has_matrix(dev->libinput_device))
 		return LITEST_NOT_APPLICABLE;
 
-	status = libinput_device_config_calibration_set_matrix(dev->libinput_device,
-							       calibration);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_calibration_set_matrix(dev->libinput_device,
+							      calibration));
 
 	litest_tablet_proximity_in(dev, 10, 10, axes);
 	litest_drain_events(li);
@@ -6473,7 +6450,6 @@ START_TEST(touch_arbitration_suspend_touch_device)
 	enum litest_device_type other;
 	struct litest_device *tablet;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
 	struct axis_replacement axes[] = {
 		{ ABS_DISTANCE, 10 },
 		{ ABS_PRESSURE, 0 },
@@ -6494,10 +6470,9 @@ START_TEST(touch_arbitration_suspend_touch_device)
 
 	/* we can't force a device suspend, but we can at least make sure
 	   the device doesn't send events */
-	status = libinput_device_config_send_events_set_mode(
+	litest_assert_config(libinput_device_config_send_events_set_mode(
 		dev->libinput_device,
-		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED));
 
 	litest_drain_events(li);
 
@@ -6536,10 +6511,9 @@ START_TEST(touch_arbitration_suspend_touch_device)
 	litest_touch_up(dev, 0);
 	litest_assert_empty_queue(li);
 
-	status = libinput_device_config_send_events_set_mode(
+	litest_assert_config(libinput_device_config_send_events_set_mode(
 		dev->libinput_device,
-		LIBINPUT_CONFIG_SEND_EVENTS_ENABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_SEND_EVENTS_ENABLED));
 
 	litest_touch_down(dev, 0, 30, 30);
 	litest_touch_move_to(dev, 0, 30, 30, 80, 80, 10);
@@ -7919,14 +7893,12 @@ START_TEST(tablet_eraser_button_different_buttons)
 	if (!libinput_tablet_tool_config_eraser_button_get_modes(pen))
 		return LITEST_NOT_APPLICABLE;
 
-	auto status = libinput_tablet_tool_config_eraser_button_set_mode(
+	litest_assert_config(libinput_tablet_tool_config_eraser_button_set_mode(
 		pen,
-		LIBINPUT_CONFIG_ERASER_BUTTON_BUTTON);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
-	status = libinput_tablet_tool_config_eraser_button_set_button(
+		LIBINPUT_CONFIG_ERASER_BUTTON_BUTTON));
+	litest_assert_config(libinput_tablet_tool_config_eraser_button_set_button(
 		pen,
-		eraser_button_mapping);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		eraser_button_mapping));
 
 	litest_log_group("Prox out to apply changed settings") {
 		litest_tablet_proximity_out(dev);
@@ -8081,13 +8053,12 @@ START_TEST(tablet_eraser_button_config_after_device_removal)
 	litest_drain_events(li);
 
 	/* Tool isn't associated with a device but config should take effect anyway */
-	auto status = libinput_tablet_tool_config_eraser_button_set_mode(
+	litest_assert_config(libinput_tablet_tool_config_eraser_button_set_mode(
 		tool,
-		LIBINPUT_CONFIG_ERASER_BUTTON_BUTTON);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
-	status =
-		libinput_tablet_tool_config_eraser_button_set_button(tool, BTN_STYLUS2);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_ERASER_BUTTON_BUTTON));
+	litest_assert_config(
+		libinput_tablet_tool_config_eraser_button_set_button(tool,
+								     BTN_STYLUS2));
 
 	litest_assert_enum_eq(libinput_tablet_tool_config_eraser_button_get_mode(tool),
 			      LIBINPUT_CONFIG_ERASER_BUTTON_BUTTON);
