@@ -17,6 +17,13 @@ libinput uses the kernel ``fuzz`` value to determine the size of the
 hysteresis. Users should override this with a udev hwdb entry where the
 device itself does not provide the correct value.
 
+If the fuzz is zero, the hysteresis starts disabled and libinput switches
+it on when it detects jitter. The ``AttrTouchpadHysteresis`` quirk overrides
+this: ``AttrTouchpadHysteresis=0`` disables the hysteresis permanently, even
+if the device has a fuzz or jitter is detected, and
+``AttrTouchpadHysteresis=1`` enables it from the start. See
+:ref:`device-quirks` for how to add a local quirk.
+
 .. _touchpad_jitter_fuzz_override:
 
 ------------------------------------------------------------------------------

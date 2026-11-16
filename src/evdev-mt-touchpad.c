@@ -190,7 +190,7 @@ tp_detect_wobbling(struct tp_dispatch *tp, struct tp_touch *t, usec_t time)
 	if (tp->nfingers_down != 1 || tp->nfingers_down != tp->old_nfingers_down)
 		return;
 
-	if (tp->hysteresis.enabled || t->history.count == 0)
+	if (tp->hysteresis.state != HYSTERESIS_STATE_INACTIVE || t->history.count == 0)
 		return;
 
 	if (!(tp->queued & TOUCHPAD_EVENT_MOTION)) {
@@ -216,7 +216,12 @@ tp_detect_wobbling(struct tp_dispatch *tp, struct tp_touch *t, usec_t time)
 
 		t->hysteresis.x_motion_history |= bit(2);
 		if (t->hysteresis.x_motion_history == r_l_r) {
-			tp->hysteresis.enabled = true;
+			/* The center is only updated while hysteresis is
+			 * enabled, so it's stale here. Start from the last
+			 * point we sent, otherwise the pointer jumps toward
+			 * wherever the center was left */
+			t->hysteresis.center = *prev_point;
+			tp->hysteresis.state = HYSTERESIS_STATE_ACTIVE;
 			evdev_log_debug(tp->device,
 					"hysteresis enabled. "
 					"See %s/touchpad-jitter.html for details\n",
@@ -228,7 +233,7 @@ tp_detect_wobbling(struct tp_dispatch *tp, struct tp_touch *t, usec_t time)
 static inline void
 tp_motion_hysteresis(struct tp_dispatch *tp, struct tp_touch *t)
 {
-	if (!tp->hysteresis.enabled)
+	if (tp->hysteresis.state != HYSTERESIS_STATE_ACTIVE)
 		return;
 
 	if (t->history.count > 0)
@@ -2915,7 +2920,7 @@ tp_interface_disable_feature(struct evdev_dispatch *dispatch,
 		tp->jump.detection_disabled = true;
 		break;
 	case LIBINPUT_FEATURE_TOUCHPAD_HYSTERESIS:
-		tp->hysteresis.enabled = false;
+		tp->hysteresis.state = HYSTERESIS_STATE_DISABLED;
 		break;
 	case LIBINPUT_FEATURE_TOUCHPAD_PALM_DETECTION:
 		tp->palm.use_mt_tool = false;
@@ -3737,8 +3742,21 @@ tp_init_hysteresis(struct tp_dispatch *tp)
 
 	tp->hysteresis.margin.x = xmargin;
 	tp->hysteresis.margin.y = ymargin;
-	tp->hysteresis.enabled = (ax->fuzz || ay->fuzz);
-	if (tp->hysteresis.enabled)
+
+	bool use_hysteresis;
+	_unref_(quirks) *q = libinput_device_get_quirks(&tp->device->base);
+	if (q && quirks_get_bool(q, QUIRK_ATTR_TOUCHPAD_HYSTERESIS, &use_hysteresis)) {
+		tp->hysteresis.state = use_hysteresis ? HYSTERESIS_STATE_ACTIVE
+						      : HYSTERESIS_STATE_DISABLED;
+		if (!use_hysteresis)
+			evdev_log_debug(tp->device, "hysteresis disabled by quirk\n");
+	} else {
+		tp->hysteresis.state = (ax->fuzz || ay->fuzz)
+					       ? HYSTERESIS_STATE_ACTIVE
+					       : HYSTERESIS_STATE_INACTIVE;
+	}
+
+	if (tp->hysteresis.state == HYSTERESIS_STATE_ACTIVE)
 		evdev_log_debug(tp->device,
 				"hysteresis enabled. "
 				"See %s/touchpad-jitter.html for details\n",

@@ -5,3 +5,14 @@ MatchName=Framework Laptop 16 Keyboard Module*
 MatchUdevType=keyboard
 MatchDMIModalias=dmi:*:svnFramework:pnLaptop16*:*
 AttrKeyboardIntegration=internal
+
+# Framework Laptop 13 Pro haptic touchpad, known to be jitter-free.
+# Limited to the Laptop 13 Pro for now since that's the only system
+# this has been verified on.
+[Framework Laptop 13 Pro Haptic Touchpad]
+MatchBus=i2c
+MatchUdevType=touchpad
+MatchVendor=0x093A
+MatchProduct=0x1343
+MatchDMIModalias=dmi:*:svnFramework:pnLaptop13Pro*:*
+AttrTouchpadHysteresis=0

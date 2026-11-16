@@ -1636,7 +1636,7 @@ set_pressure_offset(struct libinput_tablet_tool_pressure_threshold *threshold,
 	threshold->offset = offset_in_percent;
 	threshold->has_offset = true;
 
-	/* Adjust the tresholds accordingly - we use the same gap (4% in
+	/* Adjust the thresholds accordingly - we use the same gap (4% in
 	 * device coordinates) between upper and lower as before which isn't
 	 * technically correct (our range shrunk) but it's easy to calculate.
 	 */

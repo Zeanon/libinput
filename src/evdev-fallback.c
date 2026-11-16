@@ -1276,7 +1276,7 @@ fallback_return_to_neutral_state(struct fallback_dispatch *dispatch,
 	cancel_touches(dispatch, device, NULL, time);
 	release_pressed_keys(dispatch, device, time);
 	memset(dispatch->hw_key_mask, 0, sizeof(dispatch->hw_key_mask));
-	memset(dispatch->hw_key_mask, 0, sizeof(dispatch->last_hw_key_mask));
+	memset(dispatch->last_hw_key_mask, 0, sizeof(dispatch->last_hw_key_mask));
 }
 
 static void
@@ -1682,6 +1682,12 @@ static void
 fallback_init_rotation(struct fallback_dispatch *dispatch, struct evdev_device *device)
 {
 	if (device->tags & EVDEV_TAG_TRACKPOINT)
+		return;
+
+	/* Rotation only applies to relative motion, so don't offer it
+	 * on devices that have none, e.g. keyboards with a wheel */
+	if (!libevdev_has_event_code(device->evdev, EV_REL, REL_X) ||
+	    !libevdev_has_event_code(device->evdev, EV_REL, REL_Y))
 		return;
 
 	dispatch->rotation.config.is_available = fallback_rotation_config_is_available;

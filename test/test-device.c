@@ -572,6 +572,89 @@ START_TEST(device_disable_release_keys)
 }
 END_TEST
 
+START_TEST(device_disable_release_buttons_reenable)
+{
+	struct litest_device *dev = litest_current_device();
+	struct libinput *li = dev->libinput;
+	struct libinput_device *device = dev->libinput_device;
+	enum libinput_config_status status;
+
+	litest_button_click_debounced(dev, li, BTN_LEFT, true);
+	litest_drain_events(li);
+
+	status = libinput_device_config_send_events_set_mode(
+		device,
+		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED);
+	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_button_event(li, BTN_LEFT, LIBINPUT_BUTTON_STATE_RELEASED);
+	litest_assert_empty_queue(li);
+
+	/* physical release while the device is disabled */
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+	litest_assert_empty_queue(li);
+
+	status = libinput_device_config_send_events_set_mode(
+		device,
+		LIBINPUT_CONFIG_SEND_EVENTS_ENABLED);
+	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_empty_queue(li);
+
+	/* The debounce plugin did not see the release while the device was
+	 * disabled and still thinks the button is down, so it swallows the
+	 * next press */
+	litest_button_click_debounced(dev, li, BTN_LEFT, true);
+	litest_assert_empty_queue(li);
+
+	/* Its release is discarded, we never saw the press */
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+	litest_assert_empty_queue(li);
+
+	/* The next click must come through as a normal press/release
+	 * and not be swallowed by stale button state */
+	litest_button_click_debounced(dev, li, BTN_LEFT, true);
+	litest_assert_button_event(li, BTN_LEFT, LIBINPUT_BUTTON_STATE_PRESSED);
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+	litest_assert_button_event(li, BTN_LEFT, LIBINPUT_BUTTON_STATE_RELEASED);
+	litest_assert_empty_queue(li);
+}
+END_TEST
+
+START_TEST(device_disable_release_buttons_held_across_reenable)
+{
+	struct litest_device *dev = litest_current_device();
+	struct libinput *li = dev->libinput;
+	struct libinput_device *device = dev->libinput_device;
+	enum libinput_config_status status;
+
+	litest_button_click_debounced(dev, li, BTN_LEFT, true);
+	litest_drain_events(li);
+
+	status = libinput_device_config_send_events_set_mode(
+		device,
+		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED);
+	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_button_event(li, BTN_LEFT, LIBINPUT_BUTTON_STATE_RELEASED);
+	litest_assert_empty_queue(li);
+
+	status = libinput_device_config_send_events_set_mode(
+		device,
+		LIBINPUT_CONFIG_SEND_EVENTS_ENABLED);
+	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_empty_queue(li);
+
+	/* release of the button held across the re-enable is discarded */
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+	litest_assert_empty_queue(li);
+
+	/* a different button must not trigger a second BTN_LEFT release */
+	litest_button_click_debounced(dev, li, BTN_RIGHT, true);
+	litest_assert_button_event(li, BTN_RIGHT, LIBINPUT_BUTTON_STATE_PRESSED);
+	litest_button_click_debounced(dev, li, BTN_RIGHT, false);
+	litest_assert_button_event(li, BTN_RIGHT, LIBINPUT_BUTTON_STATE_RELEASED);
+	litest_assert_empty_queue(li);
+}
+END_TEST
+
 START_TEST(device_disable_release_tap)
 {
 	struct litest_device *dev = litest_current_device();
@@ -1752,6 +1835,8 @@ TEST_COLLECTION(device)
 	litest_add_no_device(device_reenable_device_removed);
 	litest_add_for_device(device_disable_release_buttons, LITEST_MOUSE);
 	litest_add_for_device(device_disable_release_keys, LITEST_KEYBOARD);
+	litest_add_for_device(device_disable_release_buttons_reenable, LITEST_MOUSE);
+	litest_add_for_device(device_disable_release_buttons_held_across_reenable, LITEST_MOUSE);
 	litest_add(device_disable_release_tap, LITEST_TOUCHPAD, LITEST_ANY);
 	litest_add(device_disable_release_tap_n_drag, LITEST_TOUCHPAD, LITEST_ANY);
 	litest_add(device_disable_release_softbutton, LITEST_CLICKPAD, LITEST_APPLE_CLICKPAD);

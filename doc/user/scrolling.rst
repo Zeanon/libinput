@@ -142,7 +142,7 @@ Circular scrolling
 ------------------------------------------------------------------------------
 
 On touchpads with a circular shape, circular scrolling is available, triggered
-by moving  finger in a circular clockwise or counter-clockwise motion.
+by moving the finger in a circular clockwise or counter-clockwise motion.
 
 .. figure:: circular-scrolling.svg
     :align: center

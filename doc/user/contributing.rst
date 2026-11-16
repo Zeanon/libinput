@@ -234,6 +234,57 @@ sufficient to make some of the more confusing steps obvious.
   to learn how to change multiple commits, or squash new changes into older
   commits.
 
+.. _use_of_ai:
+
+------------------------------------------------------------------------------
+Use of AI and LLMs
+------------------------------------------------------------------------------
+
+libinput accepts contributions that were aided by AI/LLMs, under the following
+conditions:
+
+- All AI usage **must** be disclosed in the issue and/or merge request and the
+  extent to which it was used.
+- Where applicable, AI usage **should** be disclosed in the commit message via
+  an ``Assisted-by: AI`` tag. This helps reviewers to focus their attention as
+  AI has historically produced unexpected types of bugs. Unless required
+  by your employer (or some other commanding entity), the model name/version is
+  not required. Whether the tag is required depends on the level of
+  contributions, e.g. you do not need it if the AI has merely
+  reviewed your patch.
+
+  Do not use the
+  ``Co-authored-by: Claude ...  <noreply@anthropic.com>`` format.
+  If you think the need to add a ``Co-authored-by`` tag, **you** haven't
+  contributed enough to this patch. Review it some more, test it some more,
+  think about wider implications, spend more time and effort on it until the AI
+  has merely assisted you.
+
+- If you are unsure about something an AI has found, **mention it**. It is perfectly
+  acceptable to e.g. submit a merge request that you think is complete and
+  add a "I ran this through Claude and it claims that foo happens on bar but
+  I'm not sure".
+- AI slop will be closed with no rights to appeal, any explanation as to why by
+  the maintainers is optional and should be treated as courtesy you didn't
+  extend to them by submitting slop.
+
+It helps to remember that libinput is software written by you (and the maintainers)
+for you and a few million other **people**. Using AI does not change that.
+Any use of AI should thus help **you** and the maintainers to make libinput
+better in the long run. The whole system runs on mutual respect, not messing
+with it is a good choice.
+
+For rough guidance:
+
+- having an AI help you triage an issue: good idea
+- having an AI write a patch for you: worse idea
+- having an AI review your MR: great idea
+- having an AI file an issue or merge request for you: terrible idea
+- having an AI translate an issue/MR text written by you: good idea
+- pointing out all the easy ways to get around the above policies: pointless idea
+
+Concidentally, an AI will never use libinput, so don't trust its opinion.
+
 ------------------------------------------------------------------------------
 Commit History
 ------------------------------------------------------------------------------
@@ -300,6 +351,9 @@ summary at the end of your commit message. For example: ::
 For further reading, please see
 `'on commit messages' <http://who-t.blogspot.de/2009/12/on-commit-messages.html>`_
 as a general guideline on what commit messages should contain.
+
+See also our :ref:`requirements for AI disclosure <use_of_ai>` via the
+``Assisted-by: AI`` tag.
 
 ------------------------------------------------------------------------------
 Coding Style

@@ -2839,6 +2839,15 @@ litest_touch_move_extended(struct litest_device *d,
 }
 
 void
+litest_touch_wobble(struct litest_device *d, unsigned int slot, double x, double y)
+{
+	for (int i = 0; i < 3; i++) {
+		litest_touch_move(d, slot, x + 1, y);
+		litest_touch_move(d, slot, x, y);
+	}
+}
+
+void
 litest_touch_move_to(struct litest_device *d,
 		     unsigned int slot,
 		     double x_from,

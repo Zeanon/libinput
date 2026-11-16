@@ -2630,7 +2630,7 @@ evdev_read_fuzz_prop(struct evdev_device *device, unsigned int code)
 	 * let's complain but still use a fuzz of zero for our view of the
 	 * device. Otherwise, the kernel will use the nonzero fuzz, we then
 	 * use the same fuzz on top of the pre-fuzzed data and that leads to
-	 * unresponsive behaviur.
+	 * unresponsive behavior.
 	 */
 	abs = libevdev_get_abs_info(device->evdev, code);
 	if (!abs || abs->fuzz == 0)

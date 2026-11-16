@@ -195,7 +195,7 @@ hold gesture but especially so for single-finger hold gestures.
 
 Hold gestures with a single finger are prone to being extremely short-lived.
 On many devices it is impossible to hold a finger still enough for there to
-be no pointer motion events, even if those deltas are miniscule. Changing
+be no pointer motion events, even if those deltas are minuscule. Changing
 movement thresholds to rely on hold gestures would reduce device
 responsiveness.
 

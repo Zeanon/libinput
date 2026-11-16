@@ -61,7 +61,7 @@ test_relative_event(struct litest_device *dev, double dx, double dy)
 
 	/* low-dpi devices scale up, not down, especially for slow motion.
 	 * so a 1 unit movement in a 200dpi mouse still sends a 1 pixel
-	 * movement. Work aorund this here by checking for the MOUSE_DPI
+	 * movement. Work around this here by checking for the MOUSE_DPI
 	 * property.
 	 */
 	_unref_(udev_device) *ud =
@@ -1043,7 +1043,7 @@ START_TEST(pointer_scroll_wheel_inhibit_dir_change)
 	litest_dispatch(li);
 	test_high_and_low_wheel_events_value(dev, REL_WHEEL_HI_RES, -120 - delta);
 
-	/* Scroll below the threshold in the oposite direction should be ignored */
+	/* Scroll below the threshold in the opposite direction should be ignored */
 	litest_event(dev, EV_REL, REL_WHEEL_HI_RES, -delta);
 	litest_event(dev, EV_SYN, SYN_REPORT, 0);
 	litest_dispatch(li);
@@ -2641,6 +2641,7 @@ START_TEST(pointer_accel_config)
 		LIBINPUT_ACCEL_TYPE_MOTION,
 		LIBINPUT_ACCEL_TYPE_SCROLL,
 	};
+	const double STEP_MIN = 0.000001; /* LIBINPUT_ACCEL_STEP_MIN */
 	struct custom_config_test {
 		double step;
 		double points[4];
@@ -2649,8 +2650,10 @@ START_TEST(pointer_accel_config)
 		{ 0.5, { 1.0, 2.0, 2.5, 2.6 }, valid },
 		{ 0.003, { 0.1, 0.3, 0.4, 0.45 }, valid },
 		{ 2.7, { 1.0, 3.0, 4.5, 4.5 }, valid },
+		{ STEP_MIN, { 1.0, 2.0, 2.5, 2.6 }, valid },
 		{ 0, { 1.0, 2.0, 2.5, 2.6 }, invalid },
 		{ -1, { 1.0, 2.0, 2.5, 2.6 }, invalid },
+		{ 1e-20, { 1.0, 2.0, 2.5, 2.6 }, invalid },
 		{ 1e10, { 1.0, 2.0, 2.5, 2.6 }, invalid },
 		{ 1, { 1.0, 2.0, -2.5, 2.6 }, invalid },
 		{ 1, { 1.0, 2.0, 1e10, 2.6 }, invalid },
@@ -2747,6 +2750,62 @@ START_TEST(pointer_accel_custom_zero_delta)
 	struct libinput_event *event = libinput_get_event(li);
 	struct libinput_event_pointer *ptrev = litest_is_motion_event(event);
 	litest_assert_double_gt(libinput_event_pointer_get_dx(ptrev), 30.0);
+	litest_assert_double_eq(libinput_event_pointer_get_dy(ptrev), 0.0);
+	libinput_event_destroy(event);
+}
+END_TEST
+
+START_TEST(pointer_accel_custom_tiny_step)
+{
+	struct litest_device *dev = litest_current_device();
+	struct libinput_device *device = dev->libinput_device;
+	struct libinput *li = dev->libinput;
+
+	/* This produces a *nearly* linear accel because the step size is
+	 * so tiny, only the first 0.000000x units have a curve, then it's
+	 * flat for the rest of the curve
+	 */
+	double points[] = { 0.0, 1.0, 4.0 };
+	const double STEP_MIN = 0.000001; /* LIBINPUT_ACCEL_STEP_MIN */
+
+	struct libinput_config_accel *config =
+		libinput_config_accel_create(LIBINPUT_CONFIG_ACCEL_PROFILE_CUSTOM);
+
+	litest_assert_enum_eq(
+		libinput_config_accel_set_points(config,
+						 LIBINPUT_ACCEL_TYPE_MOTION,
+						 1e-20, /* too small */
+						 ARRAY_LENGTH(points),
+						 points),
+		LIBINPUT_CONFIG_STATUS_INVALID);
+
+	/* The smallest accepted step must still produce sane output: all
+	 * realistic speeds are extrapolated from the last segment, which
+	 * must give a large but finite factor, not NaN or inf */
+	litest_assert_enum_eq(
+		libinput_config_accel_set_points(config,
+						 LIBINPUT_ACCEL_TYPE_MOTION,
+						 STEP_MIN, /* smallest possible step */
+						 ARRAY_LENGTH(points),
+						 points),
+		LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_enum_eq(libinput_device_config_accel_apply(device, config),
+			      LIBINPUT_CONFIG_STATUS_SUCCESS);
+	libinput_config_accel_destroy(config);
+
+	litest_drain_events(li);
+
+	litest_event(dev, EV_REL, REL_X, 1);
+	litest_event(dev, EV_SYN, SYN_REPORT, 0);
+	litest_dispatch(li);
+
+	struct libinput_event *event = libinput_get_event(li);
+	struct libinput_event_pointer *ptrev = litest_is_motion_event(event);
+	double dx = libinput_event_pointer_get_dx(ptrev);
+	/* Last-segment extrapolation with points [0, 1, 4] gives a factor
+	 * of ~4/step, i.e. ~4e6 for the minimum step */
+	litest_assert(isfinite(dx));
+	litest_assert_double_gt(dx, 1e6);
 	litest_assert_double_eq(libinput_event_pointer_get_dy(ptrev), 0.0);
 	libinput_event_destroy(event);
 }
@@ -4044,6 +4103,7 @@ TEST_COLLECTION(pointer)
 	litest_add(pointer_accel_config_reset_to_defaults, LITEST_RELATIVE, LITEST_ANY);
 	litest_add(pointer_accel_config, LITEST_RELATIVE, LITEST_ANY);
 	litest_add_for_device(pointer_accel_custom_zero_delta, LITEST_MOUSE);
+	litest_add_for_device(pointer_accel_custom_tiny_step, LITEST_MOUSE);
 	litest_add(pointer_accel_profile_invalid, LITEST_RELATIVE, LITEST_ANY);
 	litest_add(pointer_accel_profile_noaccel, LITEST_ANY, LITEST_TOUCHPAD|LITEST_RELATIVE|LITEST_TABLET);
 	litest_add(pointer_accel_profile_flat_motion_relative, LITEST_RELATIVE, LITEST_TOUCHPAD);

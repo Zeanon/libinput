@@ -1079,6 +1079,56 @@ START_TEST(lua_disable_touchpad_jump_detection)
 }
 END_TEST
 
+START_TEST(lua_disable_touchpad_hysteresis)
+{
+	enum when when = litest_test_param_get_i32(test_env->params, "when");
+	_destroy_(tmpdir) *tmpdir = tmpdir_create(NULL);
+	/* Disable only on the first frame, similar to what a real plugin would do.
+	 * Disabling on every frame would turn hysteresis back off before each
+	 * frame, and hide the situation where wobble detection re-enables it */
+	_autofree_ char *lua = strdup_printf(
+		"libinput:register({1})\n"
+		"local disabled = false\n"
+		"function frame_handler(dev, f, ts)\n"
+		"  if not disabled then\n"
+		"    dev:disable_feature(\"touchpad-hysteresis\")\n"
+		"    disabled = true\n"
+		"  end\n"
+		"end\n"
+		"function new_device(device)\n"
+		"  %sdevice:disable_feature(\"touchpad-hysteresis\")\n"
+		"  %sdevice:connect(\"evdev-frame\", frame_handler)\n"
+		"end\n"
+		"libinput:connect(\"new-evdev-device\", new_device)\n",
+		when == DEVICE_NEW ? "" : "-- ",
+		when == FIRST_FRAME ? "" : "-- ");
+
+	_autofree_ char *path = litest_write_plugin(tmpdir->path, lua);
+	_litest_context_destroy_ struct libinput *li =
+		litest_create_context_with_plugindir(tmpdir->path);
+
+	libinput_plugin_system_load_plugins(li, LIBINPUT_PLUGIN_SYSTEM_FLAG_NONE);
+	litest_drain_events(li);
+
+	/* No fuzz, so hysteresis starts off and only wobble detection
+	 * could switch it on */
+	_destroy_(litest_device) *dev = litest_add_device(li, LITEST_SYNAPTICS_RMI4);
+	litest_drain_events(li);
+
+	litest_touch_down(dev, 0, 50, 50);
+	litest_touch_wobble(dev, 0, 50, 50);
+	litest_drain_events(li);
+
+	/* 3 units, inside the resolution/4 = 5 unit margin, so this would
+	 * be swallowed if hysteresis were on */
+	litest_touch_move(dev, 0, 50.2, 50);
+	litest_assert_only_typed_events(li, LIBINPUT_EVENT_POINTER_MOTION);
+
+	litest_touch_up(dev, 0);
+	litest_assert_empty_queue(li);
+}
+END_TEST
+
 START_TEST(lua_disable_wheel_debouncing)
 {
 	enum when when = litest_test_param_get_i32(test_env->params, "when");
@@ -1345,6 +1395,7 @@ TEST_COLLECTION(lua)
 					litest_named_i32(FIRST_FRAME)) {
 		litest_add_parametrized_no_device(lua_disable_button_debounce, params);
 		litest_add_parametrized_no_device(lua_disable_touchpad_jump_detection, params);
+		litest_add_parametrized_no_device(lua_disable_touchpad_hysteresis, params);
 		litest_add_parametrized_no_device(lua_disable_wheel_debouncing, params);
 
 		litest_add_parametrized_no_device(lua_remove_plugin_on_timeout, params);

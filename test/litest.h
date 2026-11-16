@@ -447,6 +447,7 @@ enum litest_device_type {
 	LITEST_SYNAPTICS_RMI4,
 	LITEST_SYNAPTICS_TOPBUTTONPAD,
 	LITEST_SYNAPTICS_TOUCHPAD,
+	LITEST_TOUCHPAD_HYSTERESIS,
 	LITEST_TOUCHPAD_PALMPRESSURE_ZERO,
 	LITEST_WACOM_INTUOS5_FINGER,
 
@@ -930,6 +931,14 @@ litest_touch_move_extended(struct litest_device *d,
 			   double x,
 			   double y,
 			   struct axis_replacement *axes);
+
+/**
+ * Wobble at position x/y left and right by 1%, in quick enough succession that
+ * the touchpad's wobble detection treats it as jitter and switches hysteresis
+ * on. The touch must be down at x/y already, and is back at x/y afterwards.
+ */
+void
+litest_touch_wobble(struct litest_device *d, unsigned int slot, double x, double y);
 
 void
 litest_touch_sequence(struct litest_device *d,

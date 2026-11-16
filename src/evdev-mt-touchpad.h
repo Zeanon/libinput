@@ -191,6 +191,15 @@ enum tp_thumb_state {
 	THUMB_STATE_DEAD,
 };
 
+enum tp_hysteresis_state {
+	/* Off, but wobble detection may switch it on */
+	HYSTERESIS_STATE_INACTIVE = 0,
+	HYSTERESIS_STATE_ACTIVE,
+	/* Disabled by a plugin or the AttrTouchpadHysteresis=0 quirk,
+	 * never switched on again */
+	HYSTERESIS_STATE_DISABLED,
+};
+
 enum tp_jump_state {
 	JUMP_STATE_IGNORE = 0,
 	JUMP_STATE_EXPECT_FIRST,
@@ -362,7 +371,7 @@ struct tp_dispatch {
 	} touch_size;
 
 	struct {
-		bool enabled;
+		enum tp_hysteresis_state state;
 		struct device_coords margin;
 		unsigned int other_event_count;
 		usec_t last_motion_time;

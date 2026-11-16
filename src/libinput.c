@@ -4528,7 +4528,7 @@ libinput_config_accel_set_points(struct libinput_config_accel *config,
 	}
 
 	/* Need the negation in case step is NaN */
-	if (!(step > 0 && step <= LIBINPUT_ACCEL_STEP_MAX))
+	if (!(step >= LIBINPUT_ACCEL_STEP_MIN && step <= LIBINPUT_ACCEL_STEP_MAX))
 		return LIBINPUT_CONFIG_STATUS_INVALID;
 
 	if (npoints < LIBINPUT_ACCEL_NPOINTS_MIN ||

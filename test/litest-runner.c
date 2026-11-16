@@ -683,7 +683,7 @@ _litest_test_param_fetch(const struct litest_test_parameters *params, ...)
 			if (streq(p->name, name)) {
 				if (tolower(p->value.type) != tolower(type))
 					litest_abort_msg(
-						"Paramter type mismatch: parameter '%s' is of type %c",
+						"Parameter type mismatch: parameter '%s' is of type %c",
 						p->name,
 						p->value.type);
 				found = true;

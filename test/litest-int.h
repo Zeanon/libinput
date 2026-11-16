@@ -29,7 +29,7 @@
 #define LITEST_INT_H
 #include "litest.h"
 
-/* Use as designater for litest to change the value */
+/* Use as designator for litest to change the value */
 #define LITEST_AUTO_ASSIGN INT_MIN
 
 /* Special event code to auto-assign the BTN_TOOL_PEN and friends */

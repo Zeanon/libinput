@@ -48,7 +48,7 @@ For libinput configuration options, see libinput-debug-events(1)
 .TP 8
 .B Cursor movement
 The cursor is displayed as black triangle. Various markers are displayed in
-light grey to help debug cusor positioning. The cursor movement is
+light grey to help debug cursor positioning. The cursor movement is
 the one as seen by libinput and may not match the cursor movement of the
 display server.
 .PP

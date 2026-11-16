@@ -7330,7 +7330,7 @@ START_TEST(touchpad_speed_ignore_hovering_finger)
 	litest_touch_move_to_extended(dev, 2, 20, 20, 60, 80, axes, 20);
 	litest_drain_events(li);
 
-	/* second, third finger down withn same frame */
+	/* second, third finger down within the same frame */
 	litest_push_event_frame(dev);
 	litest_touch_down(dev, 0, 59, 70);
 	litest_touch_down(dev, 1, 65, 70);
@@ -7723,6 +7723,85 @@ START_TEST(touchpad_fuzz)
 }
 END_TEST
 
+START_TEST(touchpad_wobble_enables_hysteresis)
+{
+	struct litest_device *dev = litest_current_device();
+	struct libinput *li = dev->libinput;
+
+	/* No fuzz, so hysteresis starts off and only wobble detection
+	 * switches it on */
+	litest_touch_down(dev, 0, 50, 50);
+	litest_drain_events(li);
+
+	litest_touch_wobble(dev, 0, 50, 50);
+	litest_dispatch(li);
+
+	/* The wobble is purely horizontal. If hysteresis were switched on
+	 * against a stale center, the pointer would be pulled toward it
+	 * and move vertically too. */
+	struct libinput_event *event;
+	while ((event = libinput_get_event(li))) {
+		struct libinput_event_pointer *ptrev = litest_is_motion_event(event);
+		litest_assert_double_eq(libinput_event_pointer_get_dy(ptrev), 0.0);
+		libinput_event_destroy(event);
+	}
+
+	/* 3 units, inside the resolution/4 = 5 unit margin */
+	litest_touch_move(dev, 0, 50.2, 50);
+	litest_assert_empty_queue(li);
+
+	litest_touch_up(dev, 0);
+	litest_assert_empty_queue(li);
+}
+END_TEST
+
+START_TEST(touchpad_hysteresis_disabled_by_quirk)
+{
+	struct litest_device *dev = litest_current_device();
+	struct libinput *li = dev->libinput;
+
+	/* AttrTouchpadHysteresis=0: the wobble that switches hysteresis on
+	 * in touchpad_wobble_enables_hysteresis must not do so here */
+	litest_touch_down(dev, 0, 50, 50);
+	litest_drain_events(li);
+
+	litest_touch_wobble(dev, 0, 50, 50);
+	litest_drain_events(li);
+
+	/* 3 units, inside the resolution/4 = 6 unit margin */
+	litest_touch_move(dev, 0, 50.1, 50);
+	litest_assert_only_typed_events(li, LIBINPUT_EVENT_POINTER_MOTION);
+
+	litest_touch_up(dev, 0);
+	litest_assert_empty_queue(li);
+}
+END_TEST
+
+START_TEST(touchpad_hysteresis_enabled_by_quirk)
+{
+	/* Same device with zero fuzz, renamed to match the
+	 * AttrTouchpadHysteresis=1 section of its quirk file */
+	_destroy_(litest_device) *dev =
+		litest_create_device_with_overrides(LITEST_TOUCHPAD_HYSTERESIS,
+						    "Touchpad Hysteresis 1",
+						    NULL,
+						    NULL,
+						    NULL);
+	struct libinput *li = dev->libinput;
+
+	litest_touch_down(dev, 0, 50, 50);
+	litest_drain_events(li);
+
+	/* No wobble: the hysteresis is on from the start, so a 3 unit move
+	 * inside the resolution/4 = 6 unit margin is discarded */
+	litest_touch_move(dev, 0, 50.1, 50);
+	litest_assert_empty_queue(li);
+
+	litest_touch_up(dev, 0);
+	litest_assert_empty_queue(li);
+}
+END_TEST
+
 TEST_COLLECTION(touchpad)
 {
 	/* clang-format off */
@@ -7880,6 +7959,9 @@ TEST_COLLECTION(touchpad)
 	litest_add_for_device(touchpad_end_start_touch, LITEST_WACOM_INTUOS5_FINGER);
 
 	litest_add(touchpad_fuzz, LITEST_TOUCHPAD, LITEST_ANY);
+	litest_add_for_device(touchpad_wobble_enables_hysteresis, LITEST_SYNAPTICS_RMI4);
+	litest_add_for_device(touchpad_hysteresis_disabled_by_quirk, LITEST_TOUCHPAD_HYSTERESIS);
+	litest_add_no_device(touchpad_hysteresis_enabled_by_quirk);
 	/* clang-format on */
 }
 

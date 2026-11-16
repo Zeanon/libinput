@@ -86,7 +86,7 @@ Camera lens cover switch handling
 
 Where available, libinput listens to devices providing a camera lens cover
 switch. This is usually available on devices with a software controlled
-camera lens cover, as found e.g. ThinkPad X9-14 Gen 1 .
+camera lens cover, as found e.g. ThinkPad X9-14 Gen 1.
 
 The event sent by the kernel is ``EV_SW`` ``SW_CAMERA_LENS_COVER`` and is
 provided as **LIBINPUT_SWITCH_CAMERA_LENS_COVER**. When the switch is in state

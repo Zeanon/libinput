@@ -329,6 +329,8 @@ quirk_get_name(enum quirk q)
 		return "AttrUseVelocityAveraging";
 	case QUIRK_ATTR_TABLET_SMOOTHING:
 		return "AttrTabletSmoothing";
+	case QUIRK_ATTR_TOUCHPAD_HYSTERESIS:
+		return "AttrTouchpadHysteresis";
 	case QUIRK_ATTR_THUMB_SIZE_THRESHOLD:
 		return "AttrThumbSizeThreshold";
 	case QUIRK_ATTR_MSC_TIMESTAMP:
@@ -910,6 +912,13 @@ parse_attr(struct quirks_context *ctx,
 		rc = true;
 	} else if (streq(key, quirk_get_name(QUIRK_ATTR_TABLET_SMOOTHING))) {
 		p->id = QUIRK_ATTR_TABLET_SMOOTHING;
+		if (!parse_boolean_property(value, &b))
+			goto out;
+		p->type = PT_BOOL;
+		p->value.b = b;
+		rc = true;
+	} else if (streq(key, quirk_get_name(QUIRK_ATTR_TOUCHPAD_HYSTERESIS))) {
+		p->id = QUIRK_ATTR_TOUCHPAD_HYSTERESIS;
 		if (!parse_boolean_property(value, &b))
 			goto out;
 		p->type = PT_BOOL;

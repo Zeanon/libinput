@@ -947,6 +947,7 @@ if get_option('tests')
 		'test/litest-device-thinkpad-extrabuttons.c',
 		'test/litest-device-trackpoint.c',
 		'test/litest-device-touch-screen.c',
+		'test/litest-device-touchpad-hysteresis.c',
 		'test/litest-device-touchpad-palm-threshold-zero.c',
 		'test/litest-device-touchscreen-invalid-range.c',
 		'test/litest-device-touchscreen-fuzz.c',

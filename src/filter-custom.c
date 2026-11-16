@@ -47,7 +47,8 @@ create_custom_accel_function(double step, const double *points, size_t npoints)
 	    npoints > LIBINPUT_ACCEL_NPOINTS_MAX)
 		return NULL;
 
-	if (step <= 0 || step > LIBINPUT_ACCEL_STEP_MAX)
+	/* Need the negation in case step is NaN */
+	if (!(step >= LIBINPUT_ACCEL_STEP_MIN && step <= LIBINPUT_ACCEL_STEP_MAX))
 		return NULL;
 
 	for (size_t idx = 0; idx < npoints; idx++) {
@@ -143,13 +144,11 @@ custom_accel_function_profile(struct custom_accel_function *cf, double speed_in)
 	double step = cf->step;
 	double *points = cf->points;
 
-	/* calculate the index of the first point used for interpolation */
-	size_t i = speed_in / step;
-
-	/* if speed is greater than custom curve's max speed,
-	   use last 2 points for linear extrapolation
-	   (same calculation as linear interpolation) */
-	i = min(i, npoints - 2);
+	/* With a very small step, speed_in/step may exceed SIZE_MAX so
+	   we need to do the math as double, then cast. Plus this will take
+	   care of NaN and inf correctly to map those to npoints-2. */
+	double idx = min(speed_in / step, (double)(npoints - 2));
+	size_t i = idx;
 
 	/* the 2 points used for linear interpolation */
 	double x0 = step * i;

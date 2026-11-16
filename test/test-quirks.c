@@ -1258,6 +1258,7 @@ START_TEST(quirks_parse_bool_attr)
 	enum quirk attrs[] = {
 		QUIRK_ATTR_USE_VELOCITY_AVERAGING,
 		QUIRK_ATTR_TABLET_SMOOTHING,
+		QUIRK_ATTR_TOUCHPAD_HYSTERESIS,
 	};
 	/* clang-format off */
 	struct qtest_bool test_values[] = {

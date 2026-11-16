@@ -213,6 +213,12 @@ AttrPointingStickIntegration=internal|external
 AttrTabletSmoothing=1|0
     Enables (1) or disables (0) input smoothing for tablet devices. Smoothing is enabled
     by default, except on AES devices.
+AttrTouchpadHysteresis=1|0
+    Enables (1) or disables (0) the touchpad hysteresis; see
+    :ref:`touchpad_jitter`. By default, the hysteresis is enabled if the
+    device has a nonzero fuzz and otherwise switched on when libinput
+    detects jitter. Disable it on touchpads with high-quality, jitter-free
+    sensors, where the hysteresis would only discard intended motion.
 
 .. _device-quirks-matches:
 

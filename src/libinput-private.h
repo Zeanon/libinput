@@ -355,6 +355,11 @@ struct libinput_device_config_send_events {
  */
 #define LIBINPUT_ACCEL_STEP_MAX 10000
 
+/**
+ * Custom acceleration function min step size.
+ */
+#define LIBINPUT_ACCEL_STEP_MIN 0.000001
+
 struct libinput_config_accel_custom_func {
 	double step;
 	size_t npoints;

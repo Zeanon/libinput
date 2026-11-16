@@ -353,7 +353,7 @@ pad_fetch_group_index(struct pad_dispatch *pad, WacomDevice *wacom, int button_i
 	 *
 	 * Which means for devices where we don't have StatusLEDs
 	 * we can hardcode this behavior, if we ever get a ring+strip
-	 * devcice we need to update libwacom for that anyway.
+	 * device we need to update libwacom for that anyway.
 	 */
 
 	int group_index = -1;
