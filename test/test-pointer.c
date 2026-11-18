@@ -1727,6 +1727,50 @@ START_TEST(pointer_scroll_button_device_remove_while_down)
 END_TEST
 
 static void
+pointer_scroll_button_move(struct litest_device *dev)
+{
+	for (int i = 0; i < 10; i++) {
+		litest_event(dev, EV_REL, REL_Y, 6);
+		litest_event(dev, EV_SYN, SYN_REPORT, 0);
+	}
+	litest_dispatch(dev->libinput);
+}
+
+START_TEST(pointer_scroll_button_disable_device)
+{
+	struct litest_device *dev = litest_current_device();
+	struct libinput *li = dev->libinput;
+
+	libinput_device_config_scroll_set_method(dev->libinput_device,
+						 LIBINPUT_CONFIG_SCROLL_ON_BUTTON_DOWN);
+	libinput_device_config_scroll_set_button(dev->libinput_device, BTN_LEFT);
+	litest_disable_middleemu(dev);
+	litest_drain_events(li);
+
+	/* Disabling the device stops the scroll */
+	litest_button_click_debounced(dev, li, BTN_LEFT, true);
+	litest_timeout_buttonscroll(li);
+	pointer_scroll_button_move(dev);
+	litest_assert_only_axis_events(li, LIBINPUT_EVENT_POINTER_SCROLL_CONTINUOUS);
+	litest_sendevents_off(dev);
+	litest_assert_scroll(li, LIBINPUT_EVENT_POINTER_SCROLL_CONTINUOUS, 0, 0);
+	litest_sendevents_on(dev);
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+
+	/* and the timer, if the button was only just pressed */
+	litest_button_click_debounced(dev, li, BTN_LEFT, true);
+	litest_sendevents_off(dev);
+	litest_sendevents_on(dev);
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+	litest_timeout_buttonscroll(li);
+	litest_assert_empty_queue(li);
+
+	pointer_scroll_button_move(dev);
+	litest_assert_only_typed_events(li, LIBINPUT_EVENT_POINTER_MOTION);
+}
+END_TEST
+
+static void
 litest_enable_scroll_button_lock(struct litest_device *dev, unsigned int button)
 {
 	struct libinput_device *device = dev->libinput_device;
@@ -2375,6 +2419,55 @@ START_TEST(pointer_scroll_button_lock_hold_no_move_still_locks)
 	litest_dispatch(li);
 
 	litest_assert_scroll(li, LIBINPUT_EVENT_POINTER_SCROLL_CONTINUOUS, 0, 0);
+}
+END_TEST
+
+START_TEST(pointer_scroll_button_lock_disable)
+{
+	struct litest_device *dev = litest_current_device();
+	struct libinput *li = dev->libinput;
+
+	litest_enable_scroll_button_lock(dev, BTN_LEFT);
+	litest_disable_middleemu(dev);
+	litest_drain_events(li);
+
+	/* Disable the device during the press that locks */
+	litest_button_click_debounced(dev, li, BTN_LEFT, true);
+	litest_sendevents_off(dev);
+	litest_sendevents_on(dev);
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+
+	/* while locked, that releases the lock */
+	litest_button_click_debounced(dev, li, BTN_LEFT, true);
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+	litest_timeout_buttonscroll(li);
+	litest_sendevents_off(dev);
+	litest_sendevents_on(dev);
+	pointer_scroll_button_move(dev);
+	litest_assert_only_typed_events(li, LIBINPUT_EVENT_POINTER_MOTION);
+
+	/* and during the press that unlocks */
+	litest_button_click_debounced(dev, li, BTN_LEFT, true);
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+	litest_button_click_debounced(dev, li, BTN_LEFT, true);
+	litest_sendevents_off(dev);
+	litest_sendevents_on(dev);
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+
+	/* The lock starts over each time. Disabling the lock while locked
+	 * releases it too */
+	litest_button_click_debounced(dev, li, BTN_LEFT, true);
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+	litest_timeout_buttonscroll(li);
+	pointer_scroll_button_move(dev);
+	litest_assert_only_axis_events(li, LIBINPUT_EVENT_POINTER_SCROLL_CONTINUOUS);
+	libinput_device_config_scroll_set_button_lock(
+		dev->libinput_device,
+		LIBINPUT_CONFIG_SCROLL_BUTTON_LOCK_DISABLED);
+	litest_assert_scroll(li, LIBINPUT_EVENT_POINTER_SCROLL_CONTINUOUS, 0, 0);
+
+	pointer_scroll_button_move(dev);
+	litest_assert_only_typed_events(li, LIBINPUT_EVENT_POINTER_MOTION);
 }
 END_TEST
 
@@ -4050,6 +4143,7 @@ TEST_COLLECTION(pointer)
 	litest_add(pointer_scroll_button_no_event_before_timeout, LITEST_RELATIVE|LITEST_BUTTON, LITEST_ANY);
 	litest_add(pointer_scroll_button_middle_emulation, LITEST_RELATIVE|LITEST_BUTTON, LITEST_ANY);
 	litest_add_no_device(pointer_scroll_button_device_remove_while_down);
+	litest_add(pointer_scroll_button_disable_device, LITEST_RELATIVE|LITEST_BUTTON, LITEST_ANY);
 
 	litest_add(pointer_scroll_button_lock, LITEST_RELATIVE|LITEST_BUTTON, LITEST_ANY);
 	litest_add(pointer_scroll_button_lock_defaults, LITEST_RELATIVE|LITEST_BUTTON, LITEST_ANY);
@@ -4071,6 +4165,7 @@ TEST_COLLECTION(pointer)
 	litest_add(pointer_scroll_button_lock_scroll_releases, LITEST_RELATIVE|LITEST_BUTTON, LITEST_ANY);
 	litest_add(pointer_scroll_button_lock_scroll_within_grace, LITEST_RELATIVE|LITEST_BUTTON, LITEST_ANY);
 	litest_add(pointer_scroll_button_lock_hold_no_move_still_locks, LITEST_RELATIVE|LITEST_BUTTON, LITEST_ANY);
+	litest_add(pointer_scroll_button_lock_disable, LITEST_RELATIVE|LITEST_BUTTON, LITEST_ANY);
 
 	litest_add(pointer_scroll_nowheel_defaults, LITEST_RELATIVE|LITEST_BUTTON, LITEST_WHEEL);
 	litest_add_for_device(pointer_scroll_defaults_logitech_marble , LITEST_LOGITECH_TRACKBALL);

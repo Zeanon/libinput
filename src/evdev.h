@@ -571,6 +571,9 @@ evdev_init_button_scroll(struct evdev_device *device,
 			 void (*change_scroll_method)(struct evdev_device *));
 
 void
+evdev_reset_button_scroll(struct evdev_device *device, usec_t time);
+
+void
 evdev_set_button_scroll_lock_enabled(struct evdev_device *device, bool enabled);
 
 int
