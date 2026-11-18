@@ -625,6 +625,9 @@ evdev_middlebutton_filter_button(struct evdev_device *device,
 				 enum libinput_button_state state);
 
 void
+evdev_middlebutton_reset(struct evdev_device *device, usec_t time);
+
+void
 evdev_init_middlebutton(struct evdev_device *device, bool enabled, bool want_config);
 
 enum libinput_config_middle_emulation_state

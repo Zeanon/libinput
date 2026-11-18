@@ -655,6 +655,34 @@ START_TEST(device_disable_release_buttons_held_across_reenable)
 }
 END_TEST
 
+START_TEST(device_disable_middlebutton_timeout)
+{
+	struct litest_device *dev = litest_current_device();
+	struct libinput *li = dev->libinput;
+
+	litest_enable_middleemu(dev);
+	litest_drain_events(li);
+
+	/* Disable the device while middle button emulation still holds
+	 * back the press */
+	litest_button_click(dev, BTN_LEFT, true);
+	litest_dispatch(li);
+	litest_sendevents_off(dev);
+	litest_timeout_middlebutton(li);
+	litest_assert_empty_queue(li);
+
+	litest_sendevents_on(dev);
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+	litest_assert_empty_queue(li);
+
+	litest_button_click_debounced(dev, li, BTN_LEFT, true);
+	litest_button_click_debounced(dev, li, BTN_LEFT, false);
+	litest_assert_button_event(li, BTN_LEFT, LIBINPUT_BUTTON_STATE_PRESSED);
+	litest_assert_button_event(li, BTN_LEFT, LIBINPUT_BUTTON_STATE_RELEASED);
+	litest_assert_empty_queue(li);
+}
+END_TEST
+
 START_TEST(device_disable_release_tap)
 {
 	struct litest_device *dev = litest_current_device();
@@ -1837,6 +1865,7 @@ TEST_COLLECTION(device)
 	litest_add_for_device(device_disable_release_keys, LITEST_KEYBOARD);
 	litest_add_for_device(device_disable_release_buttons_reenable, LITEST_MOUSE);
 	litest_add_for_device(device_disable_release_buttons_held_across_reenable, LITEST_MOUSE);
+	litest_add_for_device(device_disable_middlebutton_timeout, LITEST_MOUSE);
 	litest_add(device_disable_release_tap, LITEST_TOUCHPAD, LITEST_ANY);
 	litest_add(device_disable_release_tap_n_drag, LITEST_TOUCHPAD, LITEST_ANY);
 	litest_add(device_disable_release_softbutton, LITEST_CLICKPAD, LITEST_APPLE_CLICKPAD);
