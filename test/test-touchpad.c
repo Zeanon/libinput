@@ -617,20 +617,16 @@ END_TEST
 START_TEST(touchpad_scroll_natural_enable_config)
 {
 	struct litest_device *dev = litest_current_device();
-	enum libinput_config_status status;
-
-	status = libinput_device_config_scroll_set_natural_scroll_enabled(
+	litest_assert_config(libinput_device_config_scroll_set_natural_scroll_enabled(
 		dev->libinput_device,
-		1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		1));
 	litest_assert_int_eq(libinput_device_config_scroll_get_natural_scroll_enabled(
 				     dev->libinput_device),
 			     1);
 
-	status = libinput_device_config_scroll_set_natural_scroll_enabled(
+	litest_assert_config(libinput_device_config_scroll_set_natural_scroll_enabled(
 		dev->libinput_device,
-		0);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		0));
 	litest_assert_int_eq(libinput_device_config_scroll_get_natural_scroll_enabled(
 				     dev->libinput_device),
 			     0);
@@ -883,9 +879,9 @@ START_TEST(touchpad_scroll_defaults)
 	method = libinput_device_config_scroll_get_default_method(device);
 	litest_assert_int_eq(method, expected);
 
-	status = libinput_device_config_scroll_set_method(device,
-							  LIBINPUT_CONFIG_SCROLL_EDGE);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_scroll_set_method(device,
+							 LIBINPUT_CONFIG_SCROLL_EDGE));
 	status = libinput_device_config_scroll_set_method(device,
 							  LIBINPUT_CONFIG_SCROLL_2FG);
 
@@ -1423,18 +1419,15 @@ START_TEST(touchpad_circular_scroll_method_change)
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *device = dev->libinput_device;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
-
 	litest_enable_circular_scroll(dev);
 	litest_drain_events(li);
 
 	/* Switch the method to NO_SCROLL. A ring gesture should no
 	 * longer produce scroll events; with circular scroll disabled
 	 * the ring touch falls back to ordinary pointer motion. */
-	status = libinput_device_config_scroll_set_method(
+	litest_assert_config(libinput_device_config_scroll_set_method(
 		device,
-		LIBINPUT_CONFIG_SCROLL_NO_SCROLL);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_SCROLL_NO_SCROLL));
 
 	litest_touch_down(dev, 0, 90, 50);
 	litest_touch_move_to(dev, 0, 90, 50, 50, 90, 10);
@@ -1446,10 +1439,9 @@ START_TEST(touchpad_circular_scroll_method_change)
 
 	/* Switch back to CIRCULAR. The same gesture must now produce
 	 * scroll events again. */
-	status = libinput_device_config_scroll_set_method(
+	litest_assert_config(libinput_device_config_scroll_set_method(
 		device,
-		LIBINPUT_CONFIG_SCROLL_CIRCULAR);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_SCROLL_CIRCULAR));
 
 	litest_touch_down(dev, 0, 90, 50);
 	litest_touch_move_to(dev, 0, 90, 50, 50, 90, 10);
@@ -2574,14 +2566,11 @@ START_TEST(touchpad_left_handed)
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *d = dev->libinput_device;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
-
 	if (libevdev_get_id_vendor(dev->evdev) == VENDOR_ID_APPLE &&
 	    libevdev_get_id_product(dev->evdev) == PRODUCT_ID_APPLE_APPLETOUCH)
 		return LITEST_NOT_APPLICABLE;
 
-	status = libinput_device_config_left_handed_set(d, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_left_handed_set(d, 1));
 
 	litest_drain_events(li);
 	litest_button_click(dev, BTN_LEFT, 1);
@@ -2626,13 +2615,10 @@ START_TEST(touchpad_left_handed_clickpad)
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *d = dev->libinput_device;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
-
 	if (!libinput_device_config_left_handed_is_available(d))
 		return LITEST_NOT_APPLICABLE;
 
-	status = libinput_device_config_left_handed_set(d, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_left_handed_set(d, 1));
 
 	litest_drain_events(li);
 	litest_touch_down(dev, 0, 10, 90);
@@ -2668,13 +2654,10 @@ START_TEST(touchpad_left_handed_clickfinger)
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *d = dev->libinput_device;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
-
 	if (!libinput_device_config_left_handed_is_available(d))
 		return LITEST_NOT_APPLICABLE;
 
-	status = libinput_device_config_left_handed_set(d, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_left_handed_set(d, 1));
 
 	litest_drain_events(li);
 	litest_touch_down(dev, 0, 10, 90);
@@ -2704,16 +2687,13 @@ START_TEST(touchpad_left_handed_tapping)
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *d = dev->libinput_device;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
-
 	if (!libinput_device_config_left_handed_is_available(d))
 		return LITEST_NOT_APPLICABLE;
 
 	litest_enable_tap(dev->libinput_device);
 	litest_disable_hold_gestures(dev->libinput_device);
 
-	status = libinput_device_config_left_handed_set(d, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_left_handed_set(d, 1));
 
 	litest_drain_events(li);
 
@@ -2732,16 +2712,13 @@ START_TEST(touchpad_left_handed_tapping_2fg)
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *d = dev->libinput_device;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
-
 	if (!libinput_device_config_left_handed_is_available(d))
 		return LITEST_NOT_APPLICABLE;
 
 	litest_enable_tap(dev->libinput_device);
 	litest_disable_hold_gestures(dev->libinput_device);
 
-	status = libinput_device_config_left_handed_set(d, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_left_handed_set(d, 1));
 
 	litest_drain_events(li);
 
@@ -2762,8 +2739,6 @@ START_TEST(touchpad_left_handed_delayed)
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *d = dev->libinput_device;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
-
 	if (!libinput_device_config_left_handed_is_available(d))
 		return LITEST_NOT_APPLICABLE;
 
@@ -2771,8 +2746,7 @@ START_TEST(touchpad_left_handed_delayed)
 	litest_button_click(dev, BTN_LEFT, 1);
 	litest_dispatch(li);
 
-	status = libinput_device_config_left_handed_set(d, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_left_handed_set(d, 1));
 
 	litest_button_click(dev, BTN_LEFT, 0);
 
@@ -2785,8 +2759,7 @@ START_TEST(touchpad_left_handed_delayed)
 	litest_button_click(dev, BTN_LEFT, 1);
 	litest_dispatch(li);
 
-	status = libinput_device_config_left_handed_set(d, 0);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_left_handed_set(d, 0));
 
 	litest_button_click(dev, BTN_RIGHT, 0);
 	litest_button_click(dev, BTN_LEFT, 0);
@@ -2803,8 +2776,6 @@ START_TEST(touchpad_left_handed_clickpad_delayed)
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *d = dev->libinput_device;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
-
 	if (!libinput_device_config_left_handed_is_available(d))
 		return LITEST_NOT_APPLICABLE;
 
@@ -2813,8 +2784,7 @@ START_TEST(touchpad_left_handed_clickpad_delayed)
 	litest_button_click(dev, BTN_LEFT, 1);
 	litest_dispatch(li);
 
-	status = libinput_device_config_left_handed_set(d, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_left_handed_set(d, 1));
 
 	litest_button_click(dev, BTN_LEFT, 0);
 	litest_touch_up(dev, 0);
@@ -2828,8 +2798,7 @@ START_TEST(touchpad_left_handed_clickpad_delayed)
 	litest_button_click(dev, BTN_LEFT, 1);
 	litest_dispatch(li);
 
-	status = libinput_device_config_left_handed_set(d, 0);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_left_handed_set(d, 0));
 
 	litest_button_click(dev, BTN_LEFT, 0);
 	litest_touch_up(dev, 0);
@@ -2853,15 +2822,13 @@ START_TEST(touchpad_left_handed_rotation)
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *d = dev->libinput_device;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
 	struct libinput_event *event;
 	bool rotate = touchpad_has_rotation(dev->evdev);
 
 	if (!libinput_device_config_left_handed_is_available(d))
 		return LITEST_NOT_APPLICABLE;
 
-	status = libinput_device_config_left_handed_set(d, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_left_handed_set(d, 1));
 
 	litest_drain_events(li);
 
@@ -3554,13 +3521,10 @@ START_TEST(touchpad_trackpoint_mb_click)
 	struct litest_device *touchpad = litest_current_device();
 	struct litest_device *trackpoint;
 	struct libinput *li = touchpad->libinput;
-	enum libinput_config_status status;
-
 	trackpoint = litest_add_device(li, LITEST_TRACKPOINT);
-	status = libinput_device_config_scroll_set_method(
+	litest_assert_config(libinput_device_config_scroll_set_method(
 		trackpoint->libinput_device,
-		LIBINPUT_CONFIG_SCROLL_ON_BUTTON_DOWN);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_SCROLL_ON_BUTTON_DOWN));
 
 	litest_drain_events(li);
 	litest_button_click_debounced(touchpad, li, BTN_2, true); /* middle */
@@ -4252,10 +4216,9 @@ START_TEST(touchpad_dwt_type)
 	litest_drain_events(li);
 
 	if (timeout) {
-		auto status = libinput_device_config_dwt_set_timeout(
+		litest_assert_config(libinput_device_config_dwt_set_timeout(
 			touchpad->libinput_device,
-			timeout);
-		litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+			timeout));
 	}
 
 	for (i = 0; i < 5; i++) {
@@ -5171,19 +5134,18 @@ START_TEST(touchpad_dwt_config_default_on)
 	uint32_t timeout = libinput_device_config_dwt_get_timeout(device);
 	litest_assert_int_eq(timeout, 500U);
 
-	status = libinput_device_config_dwt_set_enabled(device,
-							LIBINPUT_CONFIG_DWT_ENABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
-	status = libinput_device_config_dwt_set_enabled(device,
-							LIBINPUT_CONFIG_DWT_DISABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_dwt_set_enabled(device,
+						       LIBINPUT_CONFIG_DWT_ENABLED));
+	litest_assert_config(
+		libinput_device_config_dwt_set_enabled(device,
+						       LIBINPUT_CONFIG_DWT_DISABLED));
 
 	status = libinput_device_config_dwt_set_enabled(device, 3);
 	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_INVALID);
 
 	/* Configurable even if disabled */
-	status = libinput_device_config_dwt_set_timeout(device, 600);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(libinput_device_config_dwt_set_timeout(device, 600));
 	timeout = libinput_device_config_dwt_get_timeout(device);
 	litest_assert_int_eq(timeout, 600U);
 
@@ -5230,12 +5192,12 @@ START_TEST(touchpad_dwtp_config_default_on)
 	state = libinput_device_config_dwtp_get_default_enabled(device);
 	litest_assert_enum_eq(state, LIBINPUT_CONFIG_DWTP_ENABLED);
 
-	status = libinput_device_config_dwtp_set_enabled(device,
-							 LIBINPUT_CONFIG_DWTP_ENABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
-	status = libinput_device_config_dwtp_set_enabled(device,
-							 LIBINPUT_CONFIG_DWTP_DISABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_dwtp_set_enabled(device,
+							LIBINPUT_CONFIG_DWTP_ENABLED));
+	litest_assert_config(
+		libinput_device_config_dwtp_set_enabled(device,
+							LIBINPUT_CONFIG_DWTP_DISABLED));
 
 	status = libinput_device_config_dwtp_set_enabled(device, 3);
 	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_INVALID);
@@ -5258,9 +5220,9 @@ START_TEST(touchpad_dwt_config_default_off)
 	status = libinput_device_config_dwt_set_enabled(device,
 							LIBINPUT_CONFIG_DWT_ENABLED);
 	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_UNSUPPORTED);
-	status = libinput_device_config_dwt_set_enabled(device,
-							LIBINPUT_CONFIG_DWT_DISABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_dwt_set_enabled(device,
+						       LIBINPUT_CONFIG_DWT_DISABLED));
 
 	status = libinput_device_config_dwt_set_enabled(device, 3);
 	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_INVALID);
@@ -5283,9 +5245,9 @@ START_TEST(touchpad_dwtp_config_default_off)
 	status = libinput_device_config_dwtp_set_enabled(device,
 							 LIBINPUT_CONFIG_DWTP_ENABLED);
 	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_UNSUPPORTED);
-	status = libinput_device_config_dwtp_set_enabled(device,
-							 LIBINPUT_CONFIG_DWTP_DISABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_dwtp_set_enabled(device,
+							LIBINPUT_CONFIG_DWTP_DISABLED));
 
 	status = libinput_device_config_dwtp_set_enabled(device, 3);
 	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_INVALID);
@@ -5295,19 +5257,17 @@ END_TEST
 static inline void
 disable_dwt(struct litest_device *dev)
 {
-	enum libinput_config_status status, expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_dwt_set_enabled(dev->libinput_device,
-							LIBINPUT_CONFIG_DWT_DISABLED);
-	litest_assert_int_eq(status, expected);
+	litest_assert_config(
+		libinput_device_config_dwt_set_enabled(dev->libinput_device,
+						       LIBINPUT_CONFIG_DWT_DISABLED));
 }
 
 static inline void
 enable_dwt(struct litest_device *dev)
 {
-	enum libinput_config_status status, expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_dwt_set_enabled(dev->libinput_device,
-							LIBINPUT_CONFIG_DWT_ENABLED);
-	litest_assert_int_eq(status, expected);
+	litest_assert_config(
+		libinput_device_config_dwt_set_enabled(dev->libinput_device,
+						       LIBINPUT_CONFIG_DWT_ENABLED));
 }
 
 START_TEST(touchpad_dwt_disabled)
@@ -6521,16 +6481,14 @@ START_TEST(touchpad_disabled_on_mouse)
 	struct litest_device *dev = litest_current_device();
 	struct litest_device *mouse;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
 	bool suspend = litest_test_param_get_bool(test_env->params, "suspend");
 
 	litest_drain_events(li);
 	litest_disable_hold_gestures(dev->libinput_device);
 
-	status = libinput_device_config_send_events_set_mode(
+	litest_assert_config(libinput_device_config_send_events_set_mode(
 		dev->libinput_device,
-		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED_ON_EXTERNAL_MOUSE);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED_ON_EXTERNAL_MOUSE));
 
 	litest_touch_down(dev, 0, 20, 30);
 	litest_touch_move_to(dev, 0, 20, 30, 90, 30, 10);
@@ -6559,10 +6517,9 @@ START_TEST(touchpad_disabled_on_mouse)
 
 	if (suspend) {
 		/* Disable external mouse -> expect touchpad events */
-		status = libinput_device_config_send_events_set_mode(
+		litest_assert_config(libinput_device_config_send_events_set_mode(
 			mouse->libinput_device,
-			LIBINPUT_CONFIG_SEND_EVENTS_DISABLED);
-		litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+			LIBINPUT_CONFIG_SEND_EVENTS_DISABLED));
 
 		litest_touch_down(dev, 0, 20, 30);
 		litest_touch_move_to(dev, 0, 20, 30, 90, 30, 10);
@@ -6585,7 +6542,6 @@ START_TEST(touchpad_disabled_double_mouse)
 	struct litest_device *dev = litest_current_device();
 	struct litest_device *nonsending_mouse, *sending_mouse;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
 	bool suspend_nonsending =
 		litest_test_param_get_bool(test_env->params, "suspend-nonsending");
 	int32_t remove = litest_test_param_get_i32(test_env->params, "remove");
@@ -6593,10 +6549,9 @@ START_TEST(touchpad_disabled_double_mouse)
 	litest_drain_events(li);
 	litest_disable_hold_gestures(dev->libinput_device);
 
-	status = libinput_device_config_send_events_set_mode(
+	litest_assert_config(libinput_device_config_send_events_set_mode(
 		dev->libinput_device,
-		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED_ON_EXTERNAL_MOUSE);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_SEND_EVENTS_DISABLED_ON_EXTERNAL_MOUSE));
 
 	litest_touch_down(dev, 0, 20, 30);
 	litest_touch_move_to(dev, 0, 20, 30, 90, 30, 10);
@@ -6621,10 +6576,9 @@ START_TEST(touchpad_disabled_double_mouse)
 
 	if (suspend_nonsending) {
 		/* Disable one external mouse -> don't expect touchpad events */
-		status = libinput_device_config_send_events_set_mode(
+		litest_assert_config(libinput_device_config_send_events_set_mode(
 			nonsending_mouse->libinput_device,
-			LIBINPUT_CONFIG_SEND_EVENTS_DISABLED);
-		litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+			LIBINPUT_CONFIG_SEND_EVENTS_DISABLED));
 	}
 
 	litest_touch_down(dev, 0, 20, 30);

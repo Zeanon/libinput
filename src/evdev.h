@@ -576,6 +576,9 @@ evdev_init_button_scroll(struct evdev_device *device,
 			 void (*change_scroll_method)(struct evdev_device *));
 
 void
+evdev_reset_button_scroll(struct evdev_device *device, usec_t time);
+
+void
 evdev_set_button_scroll_lock_enabled(struct evdev_device *device, bool enabled);
 
 int
@@ -628,6 +631,9 @@ evdev_middlebutton_filter_button(struct evdev_device *device,
 				 usec_t time,
 				 evdev_usage_t button,
 				 enum libinput_button_state state);
+
+void
+evdev_middlebutton_reset(struct evdev_device *device, usec_t time);
 
 void
 evdev_init_middlebutton(struct evdev_device *device, bool enabled, bool want_config);

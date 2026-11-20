@@ -263,6 +263,8 @@ class TestYaml(unittest.TestCase):
             "GESTURE_PINCH_BEGIN",
             "GESTURE_PINCH_UPDATE",
             "GESTURE_PINCH_END",
+            "GESTURE_HOLD_BEGIN",
+            "GESTURE_HOLD_END",
             "TABLET_TOOL_AXIS",
             "TABLET_TOOL_PROXIMITY",
             "TABLET_TOOL_BUTTON",
@@ -423,6 +425,17 @@ class TestYaml(unittest.TestCase):
 
                 self.assertFalse(need_frame)
 
+    def test_events_libinput_gesture_hold(self):
+        for e in self.libinput_events(["GESTURE_HOLD_BEGIN", "GESTURE_HOLD_END"]):
+            keys = ["type", "time", "nfingers"]
+            if e["type"] == "GESTURE_HOLD_END":
+                keys.append("cancelled")
+            self.dict_key_crosscheck(e, keys)
+            self.assertIs(type(e["nfingers"]), int)
+            self.assertGreater(e["nfingers"], 0)
+            if e["type"] == "GESTURE_HOLD_END":
+                self.assertTrue(isinstance(e["cancelled"], bool))
+
     def test_events_libinput_gesture_pinch(self):
         keys = ["type", "time", "nfingers", "delta", "unaccel", "angle_delta", "scale"]
         for e in self.libinput_events(
@@ -441,16 +454,10 @@ class TestYaml(unittest.TestCase):
                 self.assertTrue(isinstance(d, float))
 
             adelta = e["angle_delta"]
-            self.assertTrue(isinstance(adelta, list))
-            self.assertEqual(len(adelta), 2)
-            for d in adelta:
-                self.assertTrue(isinstance(d, float))
+            self.assertTrue(isinstance(adelta, float))
 
             scale = e["scale"]
-            self.assertTrue(isinstance(scale, list))
-            self.assertEqual(len(scale), 2)
-            for d in scale:
-                self.assertTrue(isinstance(d, float))
+            self.assertTrue(isinstance(scale, float))
 
     def test_events_libinput_gesture_swipe(self):
         keys = ["type", "time", "nfingers", "delta", "unaccel"]

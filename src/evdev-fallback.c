@@ -1274,7 +1274,11 @@ fallback_return_to_neutral_state(struct fallback_dispatch *dispatch,
 		return;
 
 	cancel_touches(dispatch, device, NULL, time);
+	evdev_middlebutton_reset(device, time);
 	release_pressed_keys(dispatch, device, time);
+	/* The press of the scroll button is not posted while it is held, so
+	 * there is nothing to release for it above */
+	evdev_reset_button_scroll(device, time);
 	memset(dispatch->hw_key_mask, 0, sizeof(dispatch->hw_key_mask));
 	memset(dispatch->last_hw_key_mask, 0, sizeof(dispatch->last_hw_key_mask));
 }
@@ -1636,6 +1640,9 @@ fallback_change_scroll_method(struct evdev_device *device)
 
 	if (fallback_any_button_down(dispatch, device))
 		return;
+
+	/* No button is down but the scroll button lock may be engaged */
+	evdev_reset_button_scroll(device, libinput_now(evdev_libinput_context(device)));
 
 	device->scroll.method = device->scroll.want_method;
 	device->scroll.button = device->scroll.want_button;

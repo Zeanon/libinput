@@ -173,7 +173,6 @@ START_TEST(trackpoint_topsoftbuttons_left_handed_trackpoint)
 {
 	struct litest_device *touchpad = litest_current_device();
 	struct libinput *li = touchpad->libinput;
-	enum libinput_config_status status;
 	struct libinput_event *event;
 	struct libinput_device *device;
 
@@ -182,8 +181,8 @@ START_TEST(trackpoint_topsoftbuttons_left_handed_trackpoint)
 	_destroy_(litest_device) *trackpoint = litest_add_device(li, LITEST_TRACKPOINT);
 	litest_drain_events(li);
 	/* touchpad right-handed, trackpoint left-handed */
-	status = libinput_device_config_left_handed_set(trackpoint->libinput_device, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_left_handed_set(trackpoint->libinput_device, 1));
 
 	litest_touch_down(touchpad, 0, 5, 5);
 	litest_dispatch(li);
@@ -210,7 +209,6 @@ START_TEST(trackpoint_topsoftbuttons_left_handed_touchpad)
 {
 	struct litest_device *touchpad = litest_current_device();
 	struct libinput *li = touchpad->libinput;
-	enum libinput_config_status status;
 	struct libinput_event *event;
 	struct libinput_device *device;
 
@@ -219,8 +217,8 @@ START_TEST(trackpoint_topsoftbuttons_left_handed_touchpad)
 	_destroy_(litest_device) *trackpoint = litest_add_device(li, LITEST_TRACKPOINT);
 	litest_drain_events(li);
 	/* touchpad left-handed, trackpoint right-handed */
-	status = libinput_device_config_left_handed_set(touchpad->libinput_device, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_left_handed_set(touchpad->libinput_device, 1));
 
 	litest_touch_down(touchpad, 0, 5, 5);
 	litest_dispatch(li);
@@ -247,7 +245,6 @@ START_TEST(trackpoint_topsoftbuttons_left_handed_both)
 {
 	struct litest_device *touchpad = litest_current_device();
 	struct libinput *li = touchpad->libinput;
-	enum libinput_config_status status;
 	struct libinput_event *event;
 	struct libinput_device *device;
 
@@ -256,10 +253,10 @@ START_TEST(trackpoint_topsoftbuttons_left_handed_both)
 	_destroy_(litest_device) *trackpoint = litest_add_device(li, LITEST_TRACKPOINT);
 	litest_drain_events(li);
 	/* touchpad left-handed, trackpoint left-handed */
-	status = libinput_device_config_left_handed_set(touchpad->libinput_device, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
-	status = libinput_device_config_left_handed_set(trackpoint->libinput_device, 1);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_left_handed_set(touchpad->libinput_device, 1));
+	litest_assert_config(
+		libinput_device_config_left_handed_set(trackpoint->libinput_device, 1));
 
 	litest_touch_down(touchpad, 0, 5, 5);
 	litest_dispatch(li);
@@ -285,16 +282,14 @@ END_TEST
 static inline void
 enable_dwtp_with_timeout(struct litest_device *dev, uint32_t timeout)
 {
-	enum libinput_config_status status, expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_dwtp_set_enabled(dev->libinput_device,
-							 LIBINPUT_CONFIG_DWTP_ENABLED);
-	litest_assert_enum_eq(status, expected);
+	litest_assert_config(
+		libinput_device_config_dwtp_set_enabled(dev->libinput_device,
+							LIBINPUT_CONFIG_DWTP_ENABLED));
 
 	if (timeout) {
-		auto status =
+		litest_assert_config(
 			libinput_device_config_dwtp_set_timeout(dev->libinput_device,
-								timeout);
-		litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+								timeout));
 	}
 }
 
@@ -307,10 +302,9 @@ enable_dwtp(struct litest_device *dev)
 static inline void
 disable_dwtp(struct litest_device *dev)
 {
-	enum libinput_config_status status, expected = LIBINPUT_CONFIG_STATUS_SUCCESS;
-	status = libinput_device_config_dwtp_set_enabled(dev->libinput_device,
-							 LIBINPUT_CONFIG_DWTP_DISABLED);
-	litest_assert_enum_eq(status, expected);
+	litest_assert_config(
+		libinput_device_config_dwtp_set_enabled(dev->libinput_device,
+							LIBINPUT_CONFIG_DWTP_DISABLED));
 }
 
 START_TEST(trackpoint_palmdetect)

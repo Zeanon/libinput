@@ -751,6 +751,12 @@ print_gesture_event(struct record_device *dev, struct libinput_event *e)
 	case LIBINPUT_EVENT_GESTURE_SWIPE_END:
 		type = "GESTURE_SWIPE_END";
 		break;
+	case LIBINPUT_EVENT_GESTURE_HOLD_BEGIN:
+		type = "GESTURE_HOLD_BEGIN";
+		break;
+	case LIBINPUT_EVENT_GESTURE_HOLD_END:
+		type = "GESTURE_HOLD_END";
+		break;
 	default:
 		abort();
 	}
@@ -793,6 +799,25 @@ print_gesture_event(struct record_device *dev, struct libinput_event *e)
 			libinput_event_gesture_get_dy(g),
 			libinput_event_gesture_get_dx_unaccelerated(g),
 			libinput_event_gesture_get_dy_unaccelerated(g));
+		break;
+	case LIBINPUT_EVENT_GESTURE_HOLD_BEGIN:
+		iprintf(dev->fp,
+			I_EVENT,
+			"- {time: %ld.%06ld, type: %s, nfingers: %d}\n",
+			(long)(usec_as_uint64_t(time) / (int)1e6),
+			(long)(usec_as_uint64_t(time) % (int)1e6),
+			type,
+			libinput_event_gesture_get_finger_count(g));
+		break;
+	case LIBINPUT_EVENT_GESTURE_HOLD_END:
+		iprintf(dev->fp,
+			I_EVENT,
+			"- {time: %ld.%06ld, type: %s, nfingers: %d, cancelled: %s}\n",
+			(long)(usec_as_uint64_t(time) / (int)1e6),
+			(long)(usec_as_uint64_t(time) % (int)1e6),
+			type,
+			libinput_event_gesture_get_finger_count(g),
+			libinput_event_gesture_get_cancelled(g) ? "true" : "false");
 		break;
 	default:
 		abort();
@@ -1214,6 +1239,8 @@ print_libinput_event(struct record_device *dev, struct libinput_event *e)
 	case LIBINPUT_EVENT_GESTURE_SWIPE_BEGIN:
 	case LIBINPUT_EVENT_GESTURE_SWIPE_UPDATE:
 	case LIBINPUT_EVENT_GESTURE_SWIPE_END:
+	case LIBINPUT_EVENT_GESTURE_HOLD_BEGIN:
+	case LIBINPUT_EVENT_GESTURE_HOLD_END:
 		print_gesture_event(dev, e);
 		break;
 	case LIBINPUT_EVENT_TABLET_TOOL_PROXIMITY:

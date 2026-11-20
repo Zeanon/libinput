@@ -55,8 +55,6 @@ START_TEST(touchpad_click_defaults_clickfinger)
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *device = dev->libinput_device;
 	uint32_t methods, method;
-	enum libinput_config_status status;
-
 	/* call this test for apple touchpads */
 
 	methods = libinput_device_config_click_get_methods(device);
@@ -68,14 +66,12 @@ START_TEST(touchpad_click_defaults_clickfinger)
 	method = libinput_device_config_click_get_default_method(device);
 	litest_assert_enum_eq(method, LIBINPUT_CONFIG_CLICK_METHOD_CLICKFINGER);
 
-	status = libinput_device_config_click_set_method(
+	litest_assert_config(libinput_device_config_click_set_method(
 		device,
-		LIBINPUT_CONFIG_CLICK_METHOD_BUTTON_AREAS);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
-	status = libinput_device_config_click_set_method(
+		LIBINPUT_CONFIG_CLICK_METHOD_BUTTON_AREAS));
+	litest_assert_config(libinput_device_config_click_set_method(
 		device,
-		LIBINPUT_CONFIG_CLICK_METHOD_NONE);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_CLICK_METHOD_NONE));
 }
 END_TEST
 
@@ -100,15 +96,15 @@ START_TEST(touchpad_click_set_clickfinger_map)
 	enum libinput_config_status status;
 
 	map = LIBINPUT_CONFIG_CLICKFINGER_MAP_LRM;
-	status = libinput_device_config_click_set_clickfinger_button_map(device, map);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_click_set_clickfinger_button_map(device, map));
 	map = libinput_device_config_click_get_clickfinger_button_map(
 		dev->libinput_device);
 	litest_assert_enum_eq(map, LIBINPUT_CONFIG_CLICKFINGER_MAP_LRM);
 
 	map = LIBINPUT_CONFIG_CLICKFINGER_MAP_LMR;
-	status = libinput_device_config_click_set_clickfinger_button_map(device, map);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+	litest_assert_config(
+		libinput_device_config_click_set_clickfinger_button_map(device, map));
 	map = libinput_device_config_click_get_clickfinger_button_map(
 		dev->libinput_device);
 	litest_assert_enum_eq(map, LIBINPUT_CONFIG_CLICKFINGER_MAP_LMR);
@@ -128,8 +124,6 @@ START_TEST(touchpad_click_defaults_btnarea)
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *device = dev->libinput_device;
 	uint32_t methods, method;
-	enum libinput_config_status status;
-
 	/* call this test for non-apple clickpads */
 
 	methods = libinput_device_config_click_get_methods(device);
@@ -141,14 +135,12 @@ START_TEST(touchpad_click_defaults_btnarea)
 	method = libinput_device_config_click_get_default_method(device);
 	litest_assert_enum_eq(method, LIBINPUT_CONFIG_CLICK_METHOD_BUTTON_AREAS);
 
-	status = libinput_device_config_click_set_method(
+	litest_assert_config(libinput_device_config_click_set_method(
 		device,
-		LIBINPUT_CONFIG_CLICK_METHOD_CLICKFINGER);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
-	status = libinput_device_config_click_set_method(
+		LIBINPUT_CONFIG_CLICK_METHOD_CLICKFINGER));
+	litest_assert_config(libinput_device_config_click_set_method(
 		device,
-		LIBINPUT_CONFIG_CLICK_METHOD_NONE);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_CLICK_METHOD_NONE));
 }
 END_TEST
 
@@ -921,10 +913,9 @@ START_TEST(touchpad_clickfinger_appletouch_config)
 		device,
 		LIBINPUT_CONFIG_CLICK_METHOD_BUTTON_AREAS);
 	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_UNSUPPORTED);
-	status = libinput_device_config_click_set_method(
+	litest_assert_config(libinput_device_config_click_set_method(
 		device,
-		LIBINPUT_CONFIG_CLICK_METHOD_NONE);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_CLICK_METHOD_NONE));
 }
 END_TEST
 
@@ -1821,7 +1812,6 @@ START_TEST(clickpad_middleemulation_config_delayed)
 	struct litest_device *dev = litest_current_device();
 	struct libinput_device *device = dev->libinput_device;
 	struct libinput *li = dev->libinput;
-	enum libinput_config_status status;
 	int enabled;
 
 	enabled = libinput_device_config_middle_emulation_get_enabled(device);
@@ -1833,18 +1823,16 @@ START_TEST(clickpad_middleemulation_config_delayed)
 	litest_dispatch(li);
 
 	/* actual config is delayed, but status is immediate */
-	status = libinput_device_config_middle_emulation_set_enabled(
+	litest_assert_config(libinput_device_config_middle_emulation_set_enabled(
 		device,
-		LIBINPUT_CONFIG_MIDDLE_EMULATION_ENABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_MIDDLE_EMULATION_ENABLED));
 
 	enabled = libinput_device_config_middle_emulation_get_enabled(device);
 	litest_assert(enabled);
 
-	status = libinput_device_config_middle_emulation_set_enabled(
+	litest_assert_config(libinput_device_config_middle_emulation_set_enabled(
 		device,
-		LIBINPUT_CONFIG_MIDDLE_EMULATION_DISABLED);
-	litest_assert_enum_eq(status, LIBINPUT_CONFIG_STATUS_SUCCESS);
+		LIBINPUT_CONFIG_MIDDLE_EMULATION_DISABLED));
 	enabled = libinput_device_config_middle_emulation_get_enabled(device);
 	litest_assert(!enabled);
 }

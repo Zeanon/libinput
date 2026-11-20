@@ -865,6 +865,23 @@ evdev_set_button_scroll_lock_enabled(struct evdev_device *device, bool enabled)
 		device->scroll.lock_state = BUTTONSCROLL_LOCK_DISABLED;
 }
 
+/* Ends a button scroll in progress, including one held by the scroll
+ * button lock, without the release of the scroll button */
+void
+evdev_reset_button_scroll(struct evdev_device *device, usec_t time)
+{
+	libinput_timer_cancel(&device->scroll.timer);
+
+	if (device->scroll.button_scroll_state == BUTTONSCROLL_SCROLLING)
+		evdev_stop_scroll(device,
+				  time,
+				  LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS);
+	device->scroll.button_scroll_state = BUTTONSCROLL_IDLE;
+
+	if (device->scroll.lock_state != BUTTONSCROLL_LOCK_DISABLED)
+		device->scroll.lock_state = BUTTONSCROLL_LOCK_IDLE;
+}
+
 void
 evdev_init_button_scroll(struct evdev_device *device,
 			 void (*change_scroll_method)(struct evdev_device *))

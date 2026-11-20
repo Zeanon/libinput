@@ -616,6 +616,16 @@ evdev_middlebutton_filter_button(struct evdev_device *device,
 	return rc;
 }
 
+/* A press that is still held back is dropped. Buttons that were posted
+ * are for the caller to release. */
+void
+evdev_middlebutton_reset(struct evdev_device *device, usec_t time)
+{
+	middlebutton_set_state(device, MIDDLEBUTTON_IDLE, time);
+	device->middlebutton.button_mask = 0;
+	evdev_middlebutton_apply_config(device);
+}
+
 static void
 evdev_middlebutton_handle_timeout(usec_t now, void *data)
 {
